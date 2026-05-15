@@ -31,7 +31,7 @@ const RegistrationPortal = () => {
   
   const fetchUsers = async () => {
     try {
-      const res = await fetch("http://192.168.1.18:8000/api/students/");
+      const res = await fetch("http://127.0.0.1:8000/api/students/");
       const data = await res.json();
       setUsers(data);
     } catch (err) {
@@ -145,7 +145,7 @@ const RegistrationPortal = () => {
     if (!validateForm()) return; 
 
     try {
-      const response = await fetch("http://192.168.1.18:8000/api/register_student/", {
+      const response = await fetch("http://127.0.0.1:8000/api/register_student/", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(formData)

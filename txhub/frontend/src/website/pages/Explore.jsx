@@ -264,7 +264,7 @@ const [selectedOption, setSelectedOption] = useState("");
   //   const fetchEnrollments = async () => {
   //     if (user?.email) {
   //       try {
-  //         const res = await fetch(`http://192.168.1.18:8000/api/enrollments/?email=${user.email}`);
+  //         const res = await fetch(`http://127.0.0.1:8000/api/enrollments/?email=${user.email}`);
   //         const data = await res.json();
   //         if (res.ok) setUserEnrollments(data.data || []);
   //       } catch (err) {
@@ -279,7 +279,7 @@ const [selectedOption, setSelectedOption] = useState("");
     const fetchEnrollments = async () => {
       if (user?.email) {
         try {
-          const res = await fetch(`http://192.168.1.18:8000/api/enrollments/?email=${user.email}`);
+          const res = await fetch(`http://127.0.0.1:8000/api/enrollments/?email=${user.email}`);
           const data = await res.json();
           if (res.ok) setUserEnrollments(data.data || []);
         } catch (err) {
@@ -365,7 +365,7 @@ const [selectedOption, setSelectedOption] = useState("");
         return;
       }
 
-      const res = await fetch("http://192.168.1.18:8000/api/addcart/", {
+      const res = await fetch("http://127.0.0.1:8000/api/addcart/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

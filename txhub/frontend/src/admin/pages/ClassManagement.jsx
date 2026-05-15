@@ -10,9 +10,9 @@ const ClassManagement = () => {
     const fetchAllData = async () => {
         try {
             const [liveRes, recRes, resRes] = await Promise.all([
-                fetch("http://192.168.1.18:8000/api/live/"),
-                fetch("http://192.168.1.18:8000/api/recorded/"),
-                fetch("http://192.168.1.18:8000/api/resource/")
+                fetch("http://127.0.0.1:8000/api/live/"),
+                fetch("http://127.0.0.1:8000/api/recorded/"),
+                fetch("http://127.0.0.1:8000/api/resource/")
             ]);
 
             const liveData = await liveRes.json();
@@ -103,19 +103,19 @@ const ClassManagement = () => {
 
             if (activeTab === "live") {
                 if (!current.topic || !current.link) return alert("Required fields missing");
-                url = "http://192.168.1.18:8000/api/live/";
+                url = "http://127.0.0.1:8000/api/live/";
                 payload = { ...current };
                 if (!payload.date) delete payload.date;
                 if (!payload.time) delete payload.time;
             }
             else if (activeTab === "recorded") {
                 if (!current.title || !current.videoLink) return alert("Required fields missing");
-                url = "http://192.168.1.18:8000/api/recorded/";
+                url = "http://127.0.0.1:8000/api/recorded/";
                 payload = current;
             }
             else {
                 if (!current.title || !current.driveLink) return alert("Required fields missing");
-                url = "http://192.168.1.18:8000/api/resource/";
+                url = "http://127.0.0.1:8000/api/resource/";
                 payload = current;
             }
 
@@ -143,9 +143,9 @@ const ClassManagement = () => {
         try {
             let url = "";
 
-            if (type === "live") url = `http://192.168.1.18:8000/api/live-classes/${id}/`;
-            if (type === "recorded") url = `http://192.168.1.18:8000/api/recorded-classes/${id}/`;
-            if (type === "resource") url = `http://192.168.1.18:8000/api/resources/${id}/`;
+            if (type === "live") url = `http://127.0.0.1:8000/api/live-classes/${id}/`;
+            if (type === "recorded") url = `http://127.0.0.1:8000/api/recorded-classes/${id}/`;
+            if (type === "resource") url = `http://127.0.0.1:8000/api/resources/${id}/`;
 
             await fetch(url, {
                 method: "DELETE"

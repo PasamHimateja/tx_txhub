@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
 import { Mail, Lock, ArrowRight, X, Eye, EyeOff } from "lucide-react";
@@ -7,7 +7,19 @@ import { toast } from "react-hot-toast";
 
 const Login = () => {
   const navigate = useNavigate();
-  const { login } = useContext(AuthContext);
+  const { login, user } = useContext(AuthContext);
+
+  // ✅ Role-based redirection
+  useEffect(() => {
+    if (user) {
+      const isAdmin = user.isAdmin || user.role === "admin" || user.email?.endsWith("@admin.org");
+      if (isAdmin) {
+        window.location.href = "/admin";
+      } else {
+        navigate("/my-courses");
+      }
+    }
+  }, [user, navigate]);
   const [loading, setLoading] = useState(false);
 
   const [form, setForm] = useState({
@@ -65,7 +77,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const response = await fetch("http://192.168.1.37:8000/api/verify/", {
+      const response = await fetch("http://127.0.0.1:8000/api/verify/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
@@ -81,12 +93,16 @@ const Login = () => {
       if (response.ok) {
         toast.success("Login Successful! Welcome back.");
         const actualUser = data.data || data;
-        login(actualUser);
-
-        if (actualUser.email?.endsWith("@admin.org")) {
-          window.location.href = "http://localhost:3000/admin";
+        
+        const isAdmin = actualUser.isAdmin || actualUser.role === "admin" || actualUser.email?.endsWith("@admin.org");
+        
+        if (isAdmin) {
+          actualUser.isAdmin = true; // Normalize for frontend
+          login(actualUser);
+          window.location.href = "/admin";
         } else {
-          navigate("/");
+          login(actualUser);
+          navigate("/my-courses");
         }
       } else {
         toast.error(data.error || "Login failed. Please check your credentials.");
@@ -105,7 +121,7 @@ const Login = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("http://192.168.1.37:8000/api/auth/google/", {
+      const res = await fetch("http://127.0.0.1:8000/api/auth/google/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -123,10 +139,15 @@ const Login = () => {
         // FIX: handle both cases
         const actualUser = data.data || data;
 
-        if (actualUser.email?.endsWith("@admin.org")) {
-          window.location.href = "http://localhost:3000/admin";
+        const isAdmin = actualUser.isAdmin || actualUser.role === "admin" || actualUser.email?.endsWith("@admin.org");
+
+        if (isAdmin) {
+          actualUser.isAdmin = true;
+          login(actualUser);
+          window.location.href = "/admin";
         } else {
-          navigate("/");
+          login(actualUser);
+          navigate("/my-courses");
         }
       } else {
         toast.error(data.error || "Google Login failed");

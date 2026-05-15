@@ -118,7 +118,7 @@ const discount = originalPriceBase - actualPrice;
 
       console.log("📧 Sending email:", email);
 
-      const response = await fetch("http://192.168.1.18:8000/api/enroll/", {
+      const response = await fetch("http://127.0.0.1:8000/api/enroll/", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -148,7 +148,7 @@ const discount = originalPriceBase - actualPrice;
           alert("Enrollment & Payment initiated successfully ✅");
 
           // ✅ delete all cart items from DB
-          await fetch(`http://192.168.1.18:8000/api/clearcart/?email=${user.email}`, {
+          await fetch(`http://127.0.0.1:8000/api/clearcart/?email=${user.email}`, {
             method: "DELETE",
           });
 

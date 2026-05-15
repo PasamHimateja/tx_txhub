@@ -85,7 +85,7 @@ const PaymentPage = () => {
                     return;
                 }
 
-                const response = await fetch(`http://192.168.1.18:8000/api/update-payment/${studentId}/`, {
+                const response = await fetch(`http://127.0.0.1:8000/api/update-payment/${studentId}/`, {
                     method: "PUT",
                     headers: {
                         "Content-Type": "application/json",

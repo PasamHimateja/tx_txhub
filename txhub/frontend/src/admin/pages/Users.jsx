@@ -15,7 +15,7 @@ const Users = () => {
     markAsSeen();
     const fetchUsers = async () => {
       try {
-        const response = await fetch('http://192.168.1.18:8000/api/enrollments/');
+        const response = await fetch('http://127.0.0.1:8000/api/enrollments/');
         const result = await response.json();
         const dataArray = Array.isArray(result) ? result : result.data;
 

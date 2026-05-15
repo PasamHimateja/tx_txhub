@@ -677,7 +677,7 @@ const CourseDetails = () => {
     const fetchEnrollmentsAndLive = async () => {
       // 1. Fetch live classes globally
       try {
-        const liveRes = await fetch(`http://192.168.1.18:8000/api/live/`);
+        const liveRes = await fetch(`http://127.0.0.1:8000/api/live/`);
         if (liveRes.ok) {
           const liveData = await liveRes.json();
           setCourseLiveSessions(liveData);
@@ -687,7 +687,7 @@ const CourseDetails = () => {
       // 2. Fetch Enrollments
       if (!user?.email) return;
       try {
-        const response = await fetch(`http://192.168.1.18:8000/api/enrollments/?email=${user.email}`);
+        const response = await fetch(`http://127.0.0.1:8000/api/enrollments/?email=${user.email}`);
         const data = await response.json();
         if (response.ok) setEnrollments(data.data || []);
       } catch (err) { console.error("Enrollment check failed"); }

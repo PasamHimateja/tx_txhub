@@ -1,6 +1,7 @@
 import { Routes, Route } from "react-router-dom";
 import WebsiteApp from "./website/App.jsx";
 import AdminApp from "./admin/App.jsx";
+import AdminRoute from "./website/components/AdminRoute";
 
 function App() {
   const isAdminDomain = window.location.hostname.includes("admin");
@@ -8,7 +9,14 @@ function App() {
   return (
     <Routes>
       {/* 1. Always prioritize the explicit /admin/ path */}
-      <Route path="/admin/*" element={<AdminApp />} />
+      <Route 
+        path="/admin/*" 
+        element={
+          <AdminRoute>
+            <AdminApp />
+          </AdminRoute>
+        } 
+      />
 
       {/* 2. Explicitly allow auth pages to reach the website app (even on admin domains) */}
       <Route path="/login" element={<WebsiteApp />} />

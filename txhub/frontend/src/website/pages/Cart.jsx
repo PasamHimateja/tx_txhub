@@ -23,7 +23,7 @@ const CartPage = () => {
 
       try {
         const res = await fetch(
-          `http://192.168.1.18:8000/api/cart/?email=${user.email}`
+          `http://127.0.0.1:8000/api/cart/?email=${user.email}`
         );
         const data = await res.json();
 
@@ -63,7 +63,7 @@ const CartPage = () => {
   const handleDelete = async (id, title) => {
     try {
       // delete from backend
-      await fetch(`http://192.168.1.18:8000/api/deletecart/${id}/`, {
+      await fetch(`http://127.0.0.1:8000/api/deletecart/${id}/`, {
         method: "DELETE",
       });
 

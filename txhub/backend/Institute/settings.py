@@ -56,6 +56,8 @@ INSTALLED_APPS = [
     
 ]
 
+ADMIN_URL = "secure-admin-panel/"
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -200,3 +202,6 @@ CACHES = {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
     }
 }
+
+
+

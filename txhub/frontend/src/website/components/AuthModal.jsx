@@ -1,6 +1,6 @@
 import React, { useState, useContext } from "react";
 import { X, Mail, Lock, User, Phone, CheckCircle, ArrowRight } from "lucide-react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import { GoogleLogin } from "@react-oauth/google";
 
@@ -9,6 +9,7 @@ const BASE_URL = "http://127.0.0.1:8000";
 const AuthModal = () => {
   const { isAuthModalOpen, closeAuthModal, login, modalView, setModalView } =
     useContext(AuthContext);
+  const navigate = useNavigate();
 
   const isLoginView = modalView === "login";
   const toggleView = () =>
@@ -127,7 +128,7 @@ const AuthModal = () => {
       }
 
       const response = await fetch(
-        `http://192.168.1.18:8000/api/${endpoint}`,
+        `http://127.0.0.1:8000/api/${endpoint}`,
         {
           method: "POST",
           headers: { "Content-Type": "application/json" },
@@ -139,16 +140,22 @@ const AuthModal = () => {
 
       if (response.ok) {
         if (isLoginView) {
-          login(data.data || data);
+          const actualUser = data.data || data;
+          
+          // ✅ SET ADMIN FLAG
+          const isAdmin = actualUser.isAdmin || actualUser.role === "admin" || (actualUser.email || form.email || "").toLowerCase().endsWith("@admin.org");
+          if (isAdmin) {
+            actualUser.isAdmin = true;
+          }
+
+          login(actualUser);
           alert("Login Successful");
 
-          // ✅ ADMIN LOGIN CHECK
-          const userEmail = (form.email || "").trim().toLowerCase();
-
-          if (userEmail.endsWith("@admin.org")) {
-            window.location.href = "http://localhost:3000/admin"; // admin panel
+          if (isAdmin) {
+            window.location.href = "/admin"; // admin panel
           } else {
             closeAuthModal(); // normal user
+            navigate("/my-courses");
           }
         } else {
           alert("Registration Successful! Please login.");
@@ -181,15 +188,21 @@ const AuthModal = () => {
       const data = await res.json();
 
       if (res.ok) {
-        login(data.data);
+        const actualUser = data.data || data;
 
-        // ✅ ADMIN CHECK FOR GOOGLE LOGIN ALSO
-        const userEmail = (data?.data?.email || "").toLowerCase();
+        // ✅ SET ADMIN FLAG
+        const isAdmin = actualUser.isAdmin || actualUser.role === "admin" || (actualUser?.email || "").toLowerCase().endsWith("@admin.org");
+        if (isAdmin) {
+          actualUser.isAdmin = true;
+        }
 
-        if (userEmail.endsWith("@admin.org")) {
-          window.location.href = "http://localhost:3000/admin";
+        login(actualUser);
+
+        if (isAdmin) {
+          window.location.href = "/admin";
         } else {
           closeAuthModal();
+          navigate("/my-courses");
         }
 
         alert("Google Login Successful");

@@ -37,7 +37,7 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("user");
     setUser(null);
     setIsLoggedIn(false);
-    window.location.href = "http://localhost:3000/";
+    window.location.href = "/";
   };
 
   const openAuthModal = (view = "login") => {

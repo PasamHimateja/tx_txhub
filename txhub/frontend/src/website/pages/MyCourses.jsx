@@ -120,10 +120,10 @@ const MyCourses = () => {
 
       try {
         const [enrollmentRes, resourceRes, liveRes, recordedRes] = await Promise.all([
-          fetch(`http://192.168.1.18:8000/api/enrollments/?email=${user.email}`),
-          fetch(`http://192.168.1.18:8000/api/resource/`),
-          fetch(`http://192.168.1.18:8000/api/live/`),
-          fetch(`http://192.168.1.18:8000/api/recorded/`)
+          fetch(`http://127.0.0.1:8000/api/enrollments/?email=${user.email}`),
+          fetch(`http://127.0.0.1:8000/api/resource/`),
+          fetch(`http://127.0.0.1:8000/api/live/`),
+          fetch(`http://127.0.0.1:8000/api/recorded/`)
         ]);
 
         const enrollmentData = await enrollmentRes.json();

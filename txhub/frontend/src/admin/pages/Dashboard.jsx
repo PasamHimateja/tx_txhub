@@ -22,7 +22,7 @@ const Dashboard = () => {
 
   // ✅ FETCH DATA FROM BACKEND
   useEffect(() => {
-    fetch("http://192.168.1.18:8000/api/dashboard-counts/")
+    fetch("http://127.0.0.1:8000/api/dashboard-counts/")
       .then(res => res.json())
       .then(data => {
         console.log("Dashboard Data:", data);

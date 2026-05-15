@@ -1,8 +1,5 @@
-
-
-
 import React, { useState } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, Navigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
@@ -28,11 +25,30 @@ import SEO from "../components/SEO";
 
 import { RefreshCcw } from "lucide-react";
 
+
+// ✅ Admin Route Protection
+const AdminRoute = ({ children }) => {
+  const user = JSON.parse(localStorage.getItem("user"));
+
+  // Not logged in
+  if (!user) {
+    return <Navigate to="/login" replace />;
+  }
+
+  // Not admin
+  if (!user.isAdmin) {
+    return <Navigate to="/" replace />;
+  }
+
+  return children;
+};
+
 const WebsiteLayout = ({ children }) => {
   const [isRefreshing, setIsRefreshing] = useState(false);
 
   const handleRefresh = () => {
     setIsRefreshing(true);
+
     setTimeout(() => {
       window.location.reload();
     }, 500);
@@ -42,21 +58,30 @@ const WebsiteLayout = ({ children }) => {
     <>
       <ScrollToTop />
       <Navbar />
+
       {children}
+
       <Footer />
-      
-      {/* Global Floating Refresh Button */}
-      {/* <button
+
+      {/* Floating Refresh Button */}
+      {/* 
+      <button
         onClick={handleRefresh}
         className={`fixed bottom-8 left-8 z-[90] p-4 bg-white/80 backdrop-blur-md border border-slate-200 rounded-2xl shadow-2xl hover:bg-white hover:scale-110 active:scale-95 transition-all group overflow-hidden`}
         title="Refresh Page"
       >
         <div className="absolute inset-0 bg-blue-500/0 group-hover:bg-blue-500/5 transition-colors"></div>
-        <RefreshCcw 
-          size={22} 
-          className={`text-slate-600 group-hover:text-blue-600 transition-all ${isRefreshing ? 'animate-spin' : 'group-hover:rotate-180 duration-500'}`} 
+
+        <RefreshCcw
+          size={22}
+          className={`text-slate-600 group-hover:text-blue-600 transition-all ${
+            isRefreshing
+              ? "animate-spin"
+              : "group-hover:rotate-180 duration-500"
+          }`}
         />
-      </button> */}
+      </button> 
+      */}
     </>
   );
 };
@@ -64,10 +89,10 @@ const WebsiteLayout = ({ children }) => {
 function Home() {
   return (
     <div className="w-full overflow-x-hidden">
-      <SEO 
-        title="Home" 
-        description="Master industry-leading skills with TXhub. Explore our expert-led courses and transform your career today." 
+      <SEO
+        description="Master industry-leading skills with TXhub. Explore our expert-led courses and transform your career today."
       />
+
       <div className="pt-20">
         <Hero />
         <Categories />
@@ -85,7 +110,9 @@ const AppRoutes = () => {
   return (
     <WebsiteLayout>
       <AuthModal />
+
       <Routes>
+        {/* Public Routes */}
         <Route path="/" element={<Home />} />
         <Route path="/explore" element={<Explore />} />
         <Route path="/cart" element={<Cart />} />
@@ -96,6 +123,18 @@ const AppRoutes = () => {
         <Route path="/internship" element={<Form />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/my-courses" element={<MyCourses />} />
+
+        {/* ✅ Protected Admin Route */}
+        <Route
+          path="/admin"
+          element={
+            <AdminRoute>
+              <div className="pt-32 text-center text-3xl font-bold">
+                Admin Panel
+              </div>
+            </AdminRoute>
+          }
+        />
       </Routes>
     </WebsiteLayout>
   );
