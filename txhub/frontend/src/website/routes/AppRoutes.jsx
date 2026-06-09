@@ -18,6 +18,9 @@ import Explore from "../pages/Explore";
 import Cart from "../pages/Cart";
 import CourseDetails from "../pages/CourseDetails";
 import ForgotPassword from "../pages/ForgotPassword";
+import Blog from "../pages/Blog";
+import Contact from "../pages/Contact";
+import Events from "../pages/Events";
 import AuthModal from "../components/AuthModal";
 import ScrollToTop from "../components/ScrollToTop";
 import Form from "../components/Form";
@@ -123,6 +126,9 @@ const AppRoutes = () => {
         <Route path="/internship" element={<Form />} />
         <Route path="/checkout" element={<CheckoutPage />} />
         <Route path="/my-courses" element={<MyCourses />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/contact" element={<Contact />} />
+        <Route path="/events" element={<Events />} />
 
         {/* ✅ Protected Admin Route */}
         <Route

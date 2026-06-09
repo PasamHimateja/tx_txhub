@@ -118,7 +118,32 @@ const Navbar = () => {
         {/* ACTIONS */}
         <div className="flex items-center gap-2 sm:gap-4">
 
+          {/* Blog Link (Desktop) */}
+          <Link
+            to="/blog"
+            onClick={() => window.scrollTo(0, 0)}
+            className="hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all"
+          >
+            Blog
+          </Link>
 
+          {/* Contact Us Link (Desktop) */}
+          <Link
+            to="/contact"
+            onClick={() => window.scrollTo(0, 0)}
+            className="hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all"
+          >
+            Contact Us
+          </Link>
+
+          {/* Events Link (Desktop) */}
+          <Link
+            to="/events"
+            onClick={() => window.scrollTo(0, 0)}
+            className="hidden lg:flex items-center gap-1.5 px-4 py-2 rounded-xl font-semibold text-slate-600 hover:bg-blue-50 hover:text-blue-600 transition-all"
+          >
+            Events
+          </Link>
 
           {/* Explore (Desktop Dropdown) */}
 <div
@@ -367,6 +392,28 @@ onMouseEnter={() => {
                 <LayoutGrid size={24} />
                 Explore All Courses
               </button>
+
+              {/* Blog / Contact Us / Events (Mobile) */}
+              <div className="grid grid-cols-3 gap-2 mt-1">
+                <button
+                  onClick={() => { navigate("/blog"); setIsMenuOpen(false); window.scrollTo(0, 0); }}
+                  className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-100 rounded-2xl active:scale-95 transition-all text-center gap-1"
+                >
+                  <span className="text-xs font-black text-slate-700">Blog</span>
+                </button>
+                <button
+                  onClick={() => { navigate("/contact"); setIsMenuOpen(false); window.scrollTo(0, 0); }}
+                  className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-100 rounded-2xl active:scale-95 transition-all text-center gap-1"
+                >
+                  <span className="text-xs font-black text-slate-700">Contact Us</span>
+                </button>
+                <button
+                  onClick={() => { navigate("/events"); setIsMenuOpen(false); window.scrollTo(0, 0); }}
+                  className="flex flex-col items-center justify-center p-4 bg-slate-50 border border-slate-100 rounded-2xl active:scale-95 transition-all text-center gap-1"
+                >
+                  <span className="text-xs font-black text-slate-700">Events</span>
+                </button>
+              </div>
 
               <div className="grid grid-cols-2 gap-2 mt-2">
                 {categories.map((cat, i) => {
