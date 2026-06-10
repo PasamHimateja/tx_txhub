@@ -1,0 +1,277 @@
+import React, { useState, useEffect } from 'react';
+import {
+  Download, IndianRupee, ShieldCheck, Users as UsersIcon,
+  Wallet, Activity, Cpu, Globe
+} from 'lucide-react';
+
+import { useAdmin } from '../context/AdminContext';
+
+const Users = () => {
+  const [users, setUsers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const { markAsSeen } = useAdmin();
+
+  useEffect(() => {
+    markAsSeen();
+    const fetchUsers = async () => {
+      try {
+        const response = await fetch('http://127.0.0.1:8000/api/enrollments/');
+        const result = await response.json();
+        const dataArray = Array.isArray(result) ? result : result.data;
+
+        const formatted = (dataArray || []).map(u => {
+          let itemsArray = [];
+
+          if (Array.isArray(u.items)) {
+            itemsArray = u.items;
+          } else if (typeof u.items === "string") {
+            try {
+              const parsed = JSON.parse(u.items);
+              itemsArray = Array.isArray(parsed) ? parsed : [parsed];
+            } catch {
+              itemsArray = [];
+            }
+          } else if (u.items && typeof u.items === "object") {
+            itemsArray = [u.items];
+          }
+
+          if (!Array.isArray(itemsArray)) itemsArray = [];
+
+          const totalFee = Number(u.total_fee) || 0;
+          const paidAmount = Number(u.amount_paid) || 0;
+
+          return {
+            id: u.id,
+            name: u.full_name || "New Student", // Assuming full_name exists, fallback to firstItem title
+            courses: itemsArray,
+            type: u.enrollment_type || "Course",
+            mode: u.mode || "Offline",
+            totalFee,
+            paidAmount,
+          };
+        });
+
+        setUsers(formatted);
+      } catch (err) {
+        console.error("Fetch Error:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
+  }, []);
+
+  const totalReceived = users.reduce((a, b) => a + b.paidAmount, 0);
+  const totalPending = users.reduce((a, b) => a + (b.totalFee - b.paidAmount), 0);
+
+  const downloadReport = () => window.print();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen flex flex-col items-center justify-center bg-[#F4F7FE]">
+        <div className="w-12 h-12 border-4 border-indigo-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+        <p className="font-black text-slate-400 uppercase tracking-widest text-xs">Syncing Registry...</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-[#F4F7FE] font-sans text-slate-900 overflow-x-hidden">
+      <style dangerouslySetInnerHTML={{
+        __html: `
+        @media print { 
+          .print-hidden { display: none !important; } 
+          .print-area { border: none !important; box-shadow: none !important; width: 100% !important; }
+          body { background: white !important; }
+        }
+      `}} />
+
+      <div className="max-w-7xl mx-auto px-6 lg:px-10 pb-10 mt-10">
+
+        {/* HEADER SECTION */}
+        <div className="mb-8 flex flex-col sm:flex-row justify-between items-center gap-6 print-hidden">
+          <div className="flex items-center gap-4 w-full sm:w-auto">
+            <div className="bg-indigo-600 p-4 rounded-2xl shadow-xl shadow-indigo-100 shrink-0">
+              <ShieldCheck className="text-white" size={28} />
+            </div>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-black text-slate-800 tracking-tight leading-tight">
+                TX <span className="text-indigo-600">HUB</span>
+              </h1>
+              <p className="text-[10px] md:text-xs font-black text-slate-400 uppercase tracking-[0.3em] mt-1">
+                Live Management Portal
+              </p>
+            </div>
+          </div>
+
+          <button
+            onClick={downloadReport}
+            className="w-full sm:w-auto flex items-center justify-center gap-3 bg-[#0F172A] text-white px-8 py-4 rounded-2xl font-bold shadow-2xl active:scale-95 text-xs uppercase tracking-widest transition-all hover:bg-slate-800"
+          >
+            <Download size={18} /> Generate PDF Report
+          </button>
+        </div>
+
+        {/* STATS CARDS */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-10 print-hidden">
+          {[
+            { label: 'Total Students', val: users.length, icon: <UsersIcon />, bg: 'bg-blue-50', text: 'text-blue-600' },
+            { label: 'Revenue Received', val: `₹${totalReceived.toLocaleString()}`, icon: <Wallet />, bg: 'bg-emerald-50', text: 'text-emerald-600' },
+            { label: 'Outstanding Balance', val: `₹${totalPending.toLocaleString()}`, icon: <Activity />, bg: 'bg-amber-50', text: 'text-amber-600' }
+          ].map((stat, i) => (
+            <div key={i} className="bg-white p-6 rounded-[2.5rem] border border-blue-50 shadow-[0_10px_40px_rgba(0,0,0,0.02)] flex items-center gap-5">
+              <div className={`${stat.bg} p-4 rounded-2xl ${stat.text} shrink-0`}>
+                {React.cloneElement(stat.icon, { size: 24 })}
+              </div>
+              <div>
+                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{stat.label}</p>
+                <h3 className="text-2xl font-black text-slate-800 leading-none mt-1">{stat.val}</h3>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* DATA TABLE (DESKTOP) */}
+        <div className="hidden lg:block bg-white rounded-[2.5rem] border border-blue-100 shadow-2xl shadow-blue-900/5 overflow-hidden print-area">
+          <table className="w-full text-left">
+            <thead>
+              <tr className="bg-slate-50/50 border-b border-blue-50">
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Student Profile</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Course / Specialization</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400">Mode</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-center">Payment Progress</th>
+                <th className="px-6 py-6 text-[10px] font-black uppercase tracking-widest text-slate-400 text-right">Financials</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-blue-50/50">
+              {users.map((u) => {
+                const balance = u.totalFee - u.paidAmount;
+                const progress = u.totalFee > 0 ? (u.paidAmount / u.totalFee) * 100 : 0;
+
+                return (
+                  <tr key={u.id} className="hover:bg-indigo-50/5 transition-colors">
+                    <td className="px-6 py-6">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-base border border-indigo-100">
+                          {u.name.charAt(0)}
+                        </div>
+                        <div>
+                          <p className="font-black text-slate-800 text-sm">{u.name}</p>
+                          <p className="text-[9px] font-bold text-slate-400 uppercase tracking-tighter">REF: {u.id}</p>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-6">
+                      <div className="flex flex-wrap gap-2">
+                        {u.courses.map((course, i) => (
+                          <div
+                            key={i}
+                            className="inline-flex items-center gap-2 px-3 py-1 bg-blue-50 text-blue-600 rounded-lg text-[10px] font-black uppercase border border-blue-100"
+                          >
+                            <Cpu size={12} /> {course.title}
+                          </div>
+                        ))}
+                      </div>
+                    </td>
+                    <td className="px-6 py-6">
+                      <div className="flex items-center gap-2 text-[10px] font-black text-slate-600 uppercase tracking-tight">
+                        <Globe size={14} className="text-indigo-400" /> {u.mode}
+                      </div>
+                    </td>
+                    <td className="px-6 py-6">
+                      <div className="flex justify-center">
+                        <div className="relative w-10 h-10">
+                          <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                            <circle cx="18" cy="18" r="16" fill="none" className="stroke-slate-100" strokeWidth="4" />
+                            <circle
+                              cx="18" cy="18" r="16" fill="none"
+                              className={balance <= 0 ? "stroke-emerald-400" : "stroke-indigo-500"}
+                              strokeWidth="4"
+                              strokeDasharray={`${progress}, 100`}
+                              strokeLinecap="round"
+                            />
+                          </svg>
+                          <span className="absolute inset-0 flex items-center justify-center text-[8px] font-black">{Math.round(progress)}%</span>
+                        </div>
+                      </div>
+                    </td>
+                    <td className="px-6 py-6 text-right">
+                      <div className="flex items-center justify-end font-black text-slate-800 text-sm">
+                        <IndianRupee size={12} />{u.paidAmount.toLocaleString()}
+                      </div>
+                      <div className={`text-[9px] font-black uppercase mt-1 ${balance > 0 ? 'text-amber-500' : 'text-emerald-500'}`}>
+                        {balance > 0 ? `Due: ₹${balance.toLocaleString()}` : 'Full Cleared'}
+                      </div>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+
+        {/* MOBILE VIEW (CARDS) */}
+        <div className="grid grid-cols-1 gap-5 lg:hidden px-1 pb-10">
+          {users.map((u) => {
+            const balance = u.totalFee - u.paidAmount;
+            const progress = u.totalFee > 0 ? (u.paidAmount / u.totalFee) * 100 : 0;
+            return (
+              <div key={u.id} className="bg-white rounded-[2.5rem] p-6 shadow-[0_15px_50px_rgba(0,0,0,0.03)] border border-blue-50">
+                <div className="flex justify-between items-start mb-6">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-indigo-50 text-indigo-600 flex items-center justify-center font-black text-xl border border-indigo-100">
+                      {u.name.charAt(0)}
+                    </div>
+                    <div>
+                      <h4 className="font-black text-slate-800 text-base leading-tight">{u.name}</h4>
+                      <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">ID: {u.id}</p>
+                    </div>
+                  </div>
+                  <div className="relative w-11 h-11">
+                    <svg className="w-full h-full -rotate-90" viewBox="0 0 36 36">
+                      <circle cx="18" cy="18" r="16" fill="none" className="stroke-slate-100" strokeWidth="4" />
+                      <circle cx="18" cy="18" r="16" fill="none" className={balance <= 0 ? "stroke-emerald-400" : "stroke-indigo-500"} strokeWidth="4" strokeDasharray={`${progress}, 100`} strokeLinecap="round" />
+                    </svg>
+                    <span className="absolute inset-0 flex items-center justify-center text-[9px] font-black text-slate-700">{Math.round(progress)}%</span>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3 mb-6">
+                  <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100/50">
+                    <p className="text-[9px] font-black text-slate-400 uppercase mb-2">Specialization</p>
+                    <div className="flex items-center gap-2 text-[11px] font-bold text-slate-700">
+                      <Cpu size={14} className="text-indigo-400 shrink-0" />
+                      <span className="truncate">{u.courses[0]?.title || "N/A"}</span>
+                    </div>
+                  </div>
+                  <div className="bg-slate-50/80 p-4 rounded-2xl border border-slate-100/50">
+                    <p className="text-[9px] font-black text-slate-400 uppercase mb-2">Mode</p>
+                    <div className="flex items-center gap-2 text-[11px] font-bold text-slate-700">
+                      <Globe size={14} className="text-indigo-400 shrink-0" />
+                      <span className="truncate">{u.mode}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="flex justify-between items-center pt-5 border-t border-dashed border-slate-100">
+                  <div>
+                    <p className="text-[9px] font-black text-slate-400 uppercase mb-1">Paid Amount</p>
+                    <div className="flex items-center font-black text-slate-800 text-lg">
+                      <IndianRupee size={14} /> {u.paidAmount.toLocaleString()}
+                    </div>
+                  </div>
+                  <div className={`px-4 py-2 rounded-xl text-[10px] font-black uppercase border ${balance > 0 ? 'bg-amber-50 text-amber-700 border-amber-100' : 'bg-emerald-50 text-emerald-600 border-emerald-100'}`}>
+                    {balance > 0 ? `Due: ₹${balance.toLocaleString()}` : 'Fully Paid'}
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Users;

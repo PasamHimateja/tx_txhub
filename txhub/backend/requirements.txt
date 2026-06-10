@@ -1,0 +1,9 @@
+Django>=4.0
+djangorestframework
+django-cors-headers
+django-allauth
+python-dotenv
+requests
+PyJWT
+cryptography
+google-auth

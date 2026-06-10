@@ -1,0 +1,142 @@
+from rest_framework import serializers
+from App.models import UserRegister, AdminUser, Student, Enrollment, LiveClass, RecordedClass, Resource, Cart, Assignment, Note, StudentAttendance, Trainer
+
+class UserRegisterSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = UserRegister
+        fields = '__all__'
+
+class AdminUserSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = AdminUser
+        fields = ['name', 'email', 'password']
+
+
+class TrainerSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Trainer
+        fields = ['id', 'name', 'email', 'assigned_course', 'is_active', 'created_at']
+        read_only_fields = ['id', 'created_at']
+
+class TrainerLoginSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    password = serializers.CharField(write_only=True)
+
+
+class StudentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Student
+        fields = '__all__'
+ 
+
+class EnrollmentSerializer(serializers.ModelSerializer):
+    full_name = serializers.ReadOnlyField(source='user.full_name')
+
+    class Meta:
+        model = Enrollment
+        fields = "__all__"
+        read_only_fields = [
+            'user',
+            'remaining_amount',
+            'payment_status',
+            'total_fee',
+        ]
+
+
+
+# class LiveClassSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = LiveClass
+#         fields = '__all__'
+
+from rest_framework import serializers
+from .models import LiveClass
+
+class LiveClassSerializer(serializers.ModelSerializer):
+
+    def validate_targetCourse(self, value):
+        if value == "AL/ML":
+            return "AI/ML"
+        if value == "DevOps":
+            return "Devops"
+        return value
+
+    def validate_accessType(self, value):
+        # ✅ Normalize frontend values
+        if value == "Demo Class":
+            return "Demo Class (Slot Booking)"
+        if value == "Full Course":
+            return "Full Course (Fully Paid)"
+        return value
+
+    class Meta:
+        model = LiveClass
+        fields = '__all__'
+ 
+ 
+class RecordedClassSerializer(serializers.ModelSerializer):
+
+    def validate_accessType(self, value):
+        if value == "Demo Class":
+            return "Demo Class (Slot Booking)"
+        if value == "Full Course":
+            return "Full Course (Fully Paid)"
+        return value
+
+    class Meta:
+        model = RecordedClass
+        fields = '__all__'
+ 
+ 
+class ResourceSerializer(serializers.ModelSerializer):
+
+    def validate_accessType(self, value):
+        if value == "Demo Class":
+            return "Demo Class (Slot Booking)"
+        if value == "Full Course":
+            return "Full Course (Fully Paid)"
+        return value
+
+    class Meta:
+        model = Resource
+        fields = '__all__'
+ 
+# serializers.py
+from rest_framework import serializers
+from .models import Cart
+
+class CartSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Cart
+        fields = '__all__'
+
+
+
+
+from rest_framework import serializers
+from django.contrib.auth.models import User
+
+class UserSerializer(serializers.ModelSerializer):
+    isAdmin = serializers.SerializerMethodField()
+
+    class Meta:
+        model = User
+        fields = ['id', 'username', 'isAdmin']
+
+    def get_isAdmin(self, obj):
+        return obj.is_staff
+
+class AssignmentSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Assignment
+        fields = '__all__'
+
+class NoteSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Note
+        fields = '__all__'
+
+class StudentAttendanceSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = StudentAttendance
+        fields = '__all__'

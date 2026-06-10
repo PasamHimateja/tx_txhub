@@ -1,0 +1,116 @@
+﻿
+> edutech-frontend@1.0.0 lint
+> eslint .
+
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\admin\context\AdminContext.jsx
+  53:14  error  Fast refresh only works when a file only exports components. Use a new file to share constants or functions between components  react-refresh/only-export-components
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\admin\pages\Settings.jsx
+  6:19  error  'setProfile' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\admin\pages\Tenants.jsx
+   44:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  42 |
+  43 |   useEffect(() => {
+> 44 |     fetchUsers();
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+  45 |   }, []);
+  46 |
+  47 |   const handleChange = (e) => {  react-hooks/set-state-in-effect
+  192:14  error  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-unused-vars
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\admin\pages\Users.jsx
+  63:6  warning  React Hook useEffect has a missing dependency: 'markAsSeen'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\website\components\Courses.jsx
+    4:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                    no-unused-vars
+   74:24  error  'setNotification' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+   76:11  error  'addToCart' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u        no-unused-vars
+  144:37  error  'index' is defined but never used                                                                no-unused-vars
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\website\components\Footer.jsx
+  100:22  error  'Icon' is defined but never used  no-unused-vars
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\website\components\Form.jsx
+  69:18  error  'error' is defined but never used  no-unused-vars
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\website\components\Modes.jsx
+  126:10  error  'motion' is defined but never used. Allowed unused vars must match /^[A-Z_]/u  no-unused-vars
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\website\components\Navbar.jsx
+   76:16  error  'err' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             no-unused-vars
+   76:21  error  Empty block statement                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                       no-empty
+  112:5   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  110 |   // Close menus when route changes
+  111 |   useEffect(() => {
+> 112 |     setIsMenuOpen(false);
+      |     ^^^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  113 |     setIsProfileMenuOpen(false);
+  114 |     setIsExploreOpen(false);
+  115 |   }, [location.pathname]);  react-hooks/set-state-in-effect
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\website\components\Slpahscreen.jsx
+  8:5  error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+   6 |
+   7 |   useEffect(() => {
+>  8 |     setAnimate(true);
+     |     ^^^^^^^^^^ Avoid calling setState() directly within an effect
+   9 |
+  10 |     const timer = setTimeout(() => {
+  11 |       onFinish();  react-hooks/set-state-in-effect
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\website\context\AuthContext.jsx
+  1:42  error  'useEffect' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                            no-unused-vars
+  3:14  error  Fast refresh only works when a file only exports components. Move your React context(s) to a separate file  react-refresh/only-export-components
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\website\context\CartContext.jsx
+  3:14  error  Fast refresh only works when a file only exports components. Move your React context(s) to a separate file  react-refresh/only-export-components
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\website\pages\CourseDetails.jsx
+  256:16  error  'err' is defined but never used  no-unused-vars
+  264:16  error  'err' is defined but never used  no-unused-vars
+
+C:\Users\91888\Desktop\txhub_educational\frontend\src\website\pages\Explore.jsx
+   14:8   error  'backendImg' is defined but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 no-unused-vars
+  234:9   error  'isEnrolled' is assigned a value but never used. Allowed unused vars must match /^[A-Z_]/u                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                        no-unused-vars
+  321:7   error  Error: Calling setState synchronously within an effect can trigger cascading renders
+
+Effects are intended to synchronize state between React and external systems such as manually updating the DOM, state management libraries, or other platform APIs. In general, the body of an effect should do one or both of the following:
+* Update external systems with the latest state from React.
+* Subscribe for updates from some external system, calling setState in a callback function when external state changes.
+
+Calling setState synchronously within an effect body causes cascading renders that can hurt performance, and is not recommended. (https://react.dev/learn/you-might-not-need-an-effect).
+
+  319 |   useEffect(() => {
+  320 |     if (location.state?.category) {
+> 321 |       setCategory(location.state.category);
+      |       ^^^^^^^^^^^ Avoid calling setState() directly within an effect
+  322 |     } else {
+  323 |       setCategory("All");
+  324 |     }  react-hooks/set-state-in-effect
+  450:47  error  'index' is defined but never used                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                 no-unused-vars
+
+Γ£û 25 problems (24 errors, 1 warning)
+
