@@ -58,6 +58,24 @@ function Modal({ isOpen, onClose, title, children, size = 'md' }) {
   );
 }
 
+// ─── CIRCULAR PROGRESS COMPONENT ───────────────────────────
+const CircularProgress = ({ progress, size = 36, strokeWidth = 3 }) => {
+  const radius = (size - strokeWidth) / 2;
+  const circumference = radius * 2 * Math.PI;
+  const offset = circumference - (progress / 100) * circumference;
+  const color = progress > 80 ? '#22c55e' : progress > 40 ? '#f59e0b' : '#f43f5e';
+
+  return (
+    <div className="relative flex items-center justify-center" style={{ width: size, height: size }}>
+      <svg className="transform -rotate-90" width={size} height={size}>
+        <circle className="text-slate-100" strokeWidth={strokeWidth} stroke="currentColor" fill="transparent" r={radius} cx={size / 2} cy={size / 2} />
+        <circle stroke={color} strokeWidth={strokeWidth} strokeDasharray={circumference} strokeDashoffset={offset} strokeLinecap="round" fill="transparent" r={radius} cx={size / 2} cy={size / 2} className="transition-all duration-1000 ease-out" />
+      </svg>
+      <span className="absolute text-[10px] font-bold text-slate-600">{progress}%</span>
+    </div>
+  );
+};
+
 // ─── INITIAL MOCK DATA ─────────────────────────────────────
 const INITIAL_STUDENTS = [
   { id: 1, name: 'Alice Freeman', email: 'alice.f@example.com', course: 'Advanced React', progress: 85, status: 'Active' },
@@ -163,11 +181,8 @@ export default function MentorDashboard() {
                     <p className="text-xs text-slate-500">{student.course}</p>
                   </div>
                 </div>
-                <div className="flex items-center gap-4 w-1/3">
-                  <div className="flex-1 h-2 bg-slate-200 rounded-full overflow-hidden">
-                    <div className={`h-full rounded-full ${student.progress > 80 ? 'bg-green-500' : student.progress > 40 ? 'bg-amber-500' : 'bg-rose-500'}`} style={{ width: `${student.progress}%` }} />
-                  </div>
-                  <span className="text-xs font-bold text-slate-600 w-8">{student.progress}%</span>
+                <div className="flex items-center justify-end w-1/3 pr-2">
+                  <CircularProgress progress={student.progress} size={40} />
                 </div>
               </div>
             ))}
@@ -241,12 +256,7 @@ export default function MentorDashboard() {
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-600 font-medium">{student.course}</td>
                   <td className="px-6 py-4">
-                    <div className="flex items-center gap-2">
-                      <div className="w-24 h-1.5 bg-slate-200 rounded-full overflow-hidden">
-                        <div className="h-full bg-indigo-500 rounded-full" style={{ width: `${student.progress}%` }} />
-                      </div>
-                      <span className="text-xs font-bold text-slate-500">{student.progress}%</span>
-                    </div>
+                    <CircularProgress progress={student.progress} size={36} />
                   </td>
                   <td className="px-6 py-4">
                     <span className={`px-2.5 py-1 rounded-full text-[10px] font-bold tracking-wide uppercase ${
@@ -416,49 +426,189 @@ export default function MentorDashboard() {
   // ═══════════════════════════════════════════
   const AttendanceTab = () => {
     const presentCount = Object.values(attendance).filter(Boolean).length;
+    const absentCount = students.length - presentCount;
     const today = new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+    
+    const [focusIndex, setFocusIndex] = useState(0);
+    const [searchQuery, setSearchQuery] = useState('');
+    
+    const currentFocusStudent = students.length > 0 ? students[focusIndex % students.length] : null;
+    
+    const handleFocusPresent = () => {
+      if (!currentFocusStudent) return;
+      setAttendance(prev => ({ ...prev, [currentFocusStudent.id]: true }));
+      setFocusIndex(prev => prev + 1);
+      showToast(`${currentFocusStudent.name} marked Present!`, 'success');
+    };
+    const handleFocusAbsent = () => {
+      if (!currentFocusStudent) return;
+      setAttendance(prev => ({ ...prev, [currentFocusStudent.id]: false }));
+      setFocusIndex(prev => prev + 1);
+      showToast(`${currentFocusStudent.name} marked Absent!`, 'info');
+    };
+
+    const filteredStudents = students.filter(s => s.name.toLowerCase().includes(searchQuery.toLowerCase()) || s.course.toLowerCase().includes(searchQuery.toLowerCase()));
 
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="space-y-6">
-        {/* Attendance Stats Bar */}
-        <div className="bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+        
+        {/* Hub Header */}
+        <div className="flex flex-col md:flex-row justify-between items-center bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 gap-4">
           <div>
-            <h3 className="font-bold text-lg text-slate-800">Attendance — {today}</h3>
-            <p className="text-sm text-slate-500 mt-1"><span className="text-green-600 font-bold">{presentCount}</span> present · <span className="text-rose-600 font-bold">{students.length - presentCount}</span> absent out of {students.length} students</p>
+            <h2 className="text-2xl font-black text-slate-800 flex items-center gap-3">
+              <Calendar className="w-7 h-7 text-indigo-600" />
+              Attendance Hub
+            </h2>
+            <p className="text-sm text-slate-500 font-medium mt-1">{today}</p>
           </div>
-          <div className="flex gap-3">
-            <button onClick={() => { const all = {}; students.forEach(s => all[s.id] = true); setAttendance(all); showToast('Marked all students present!'); }}
-              className="px-4 py-2 bg-green-50 text-green-700 rounded-xl text-sm font-bold hover:bg-green-100 transition-colors active:scale-95">Mark All Present</button>
-            <button onClick={() => { const all = {}; students.forEach(s => all[s.id] = false); setAttendance(all); showToast('Cleared all attendance'); }}
-              className="px-4 py-2 bg-slate-100 text-slate-600 rounded-xl text-sm font-bold hover:bg-slate-200 transition-colors active:scale-95">Reset</button>
-            <button onClick={() => { showToast(`Attendance saved: ${presentCount}/${students.length} present`); }}
-              className="px-4 py-2 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 active:scale-95">Save</button>
+          <div className="flex items-center gap-6">
+            <div className="text-center">
+              <p className="text-xs font-bold text-slate-400 uppercase">Present</p>
+              <p className="text-xl font-black text-green-600">{presentCount}</p>
+            </div>
+            <div className="w-px h-8 bg-slate-200"></div>
+            <div className="text-center">
+              <p className="text-xs font-bold text-slate-400 uppercase">Absent</p>
+              <p className="text-xl font-black text-rose-600">{absentCount}</p>
+            </div>
+            <div className="w-px h-8 bg-slate-200"></div>
+            <button onClick={() => { showToast('Attendance records saved!'); }} className="px-6 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-colors shadow-lg shadow-indigo-200 active:scale-95">
+              Save Records
+            </button>
           </div>
         </div>
 
-        {/* Student Attendance List */}
-        <div className="bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden">
-          <div className="divide-y divide-slate-100">
-            {students.map(student => (
-              <div key={student.id} className={`flex items-center justify-between px-6 py-5 transition-colors ${attendance[student.id] ? 'bg-green-50/40' : 'hover:bg-slate-50'}`}>
-                <div className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-sm ${
-                    attendance[student.id] ? 'bg-green-200 text-green-800' : 'bg-slate-200 text-slate-500'
-                  }`}>{student.name.charAt(0)}</div>
-                  <div>
-                    <h4 className="font-semibold text-sm text-slate-800">{student.name}</h4>
-                    <p className="text-xs text-slate-400">{student.email} · {student.course}</p>
-                  </div>
-                </div>
-                <button
-                  onClick={() => setAttendance(prev => ({ ...prev, [student.id]: !prev[student.id] }))}
-                  className={`relative w-14 h-8 rounded-full transition-colors duration-300 ${attendance[student.id] ? 'bg-green-500' : 'bg-slate-300'}`}
-                >
-                  <div className={`absolute top-1 w-6 h-6 bg-white rounded-full shadow-md transition-transform duration-300 ${attendance[student.id] ? 'translate-x-7' : 'translate-x-1'}`} />
-                </button>
+        <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
+          
+          {/* LEFT PANEL: Focus, Check-in, Calendar */}
+          <div className="xl:col-span-1 space-y-6">
+            
+            {/* Minimalist Check-in (Search) */}
+            <div className="bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+              <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Search className="w-5 h-5 text-indigo-500" /> Quick Check-in</h3>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+                <input type="text" placeholder="Search by name or course..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)}
+                  className="w-full pl-10 pr-4 py-3 bg-slate-50 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:bg-white transition-all" />
               </div>
-            ))}
+            </div>
+
+            {/* Flashcard Focus Mode */}
+            {currentFocusStudent && (
+              <div className="bg-gradient-to-br from-slate-800 to-slate-900 rounded-3xl p-6 text-white shadow-xl relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-indigo-500 opacity-20 blur-3xl rounded-full"></div>
+                <h3 className="font-bold text-indigo-300 mb-6 flex items-center gap-2"><Star className="w-5 h-5" /> Focus Mode</h3>
+                
+                <AnimatePresence mode="wait">
+                  <motion.div key={currentFocusStudent.id} initial={{ x: 50, opacity: 0 }} animate={{ x: 0, opacity: 1 }} exit={{ x: -50, opacity: 0 }} className="bg-white/10 backdrop-blur-md border border-white/20 rounded-2xl p-6 text-center shadow-inner relative z-10">
+                    <div className="w-16 h-16 rounded-full bg-indigo-500/30 border-2 border-indigo-400/50 mx-auto flex items-center justify-center text-2xl font-black shadow-lg mb-4 text-white">
+                      {currentFocusStudent.name.charAt(0)}
+                    </div>
+                    <h4 className="font-bold text-xl mb-1">{currentFocusStudent.name}</h4>
+                    <p className="text-sm text-indigo-200 mb-6">{currentFocusStudent.course}</p>
+                    
+                    <div className="flex gap-3">
+                      <button onClick={handleFocusAbsent} className="flex-1 py-3 rounded-xl bg-white/5 border border-white/10 hover:bg-rose-500/20 hover:border-rose-500/50 hover:text-rose-400 transition-all font-bold text-sm text-slate-300 active:scale-95">
+                        Absent
+                      </button>
+                      <button onClick={handleFocusPresent} className="flex-1 py-3 rounded-xl bg-indigo-500 hover:bg-indigo-400 transition-all font-bold text-sm shadow-lg shadow-indigo-500/30 text-white active:scale-95">
+                        Present
+                      </button>
+                    </div>
+                  </motion.div>
+                </AnimatePresence>
+                <div className="text-center mt-4 text-xs text-slate-400 font-medium">Card {focusIndex % students.length + 1} of {students.length}</div>
+              </div>
+            )}
+
+            {/* Calendar Heatmap (Mocked visual) */}
+            <div className="bg-white p-6 rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
+              <h3 className="font-bold text-slate-800 mb-4 flex items-center gap-2"><Calendar className="w-5 h-5 text-indigo-500" /> Weekly Trends</h3>
+              <div className="flex justify-between items-end h-32 gap-2 pb-2">
+                {['M','T','W','T','F','S','S'].map((day, i) => {
+                  const height = [40, 60, 80, 50, 90, 20, 10][i];
+                  return (
+                    <div key={i} className="flex flex-col items-center gap-2 flex-1">
+                      <div className="w-full bg-slate-100 rounded-t-lg relative flex-1 group cursor-pointer hover:bg-indigo-50 transition-colors">
+                        <div className="absolute bottom-0 w-full bg-indigo-500 rounded-t-lg transition-all group-hover:bg-indigo-400" style={{ height: `${height}%` }}></div>
+                      </div>
+                      <span className="text-xs font-bold text-slate-400">{day}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+
           </div>
+
+          {/* RIGHT PANEL: Traditional Data Table */}
+          <div className="xl:col-span-2 bg-white rounded-3xl shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 overflow-hidden flex flex-col h-[750px]">
+            <div className="p-6 border-b border-slate-100 flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 bg-slate-50/50">
+              <h3 className="font-bold text-lg text-slate-800 flex items-center gap-2"><ClipboardList className="w-5 h-5 text-indigo-500" /> Detailed Roster</h3>
+              <div className="flex gap-2">
+                <button onClick={() => { const all = {}; students.forEach(s => all[s.id] = true); setAttendance(all); showToast('All Present!'); }} className="px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-bold hover:bg-green-100 transition-colors">Mark All Present</button>
+                <button onClick={() => { const all = {}; students.forEach(s => all[s.id] = false); setAttendance(all); showToast('Reset'); }} className="px-3 py-1.5 bg-slate-100 text-slate-600 rounded-lg text-xs font-bold hover:bg-slate-200 transition-colors">Reset</button>
+              </div>
+            </div>
+            
+            <div className="flex-1 overflow-y-auto p-0 hide-scrollbar">
+              <table className="w-full text-left border-collapse min-w-[600px]">
+                <thead className="sticky top-0 bg-slate-50/95 backdrop-blur-md z-10 border-b border-slate-100">
+                  <tr>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Student</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Course</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">Status</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-50">
+                  {filteredStudents.length === 0 ? (
+                    <tr><td colSpan="4" className="p-8 text-center text-slate-400">No students found.</td></tr>
+                  ) : filteredStudents.map((student) => {
+                    const isPresent = attendance[student.id];
+                    return (
+                      <motion.tr layout key={student.id} className={`group transition-colors hover:bg-slate-50/50 ${isPresent ? 'bg-green-50/20' : ''}`}>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold text-white shadow-sm transition-colors ${
+                              isPresent ? 'bg-green-500' : 'bg-slate-300 group-hover:bg-indigo-400'
+                            }`}>
+                              {student.name.charAt(0)}
+                            </div>
+                            <div>
+                              <div className="font-bold text-slate-800 text-sm">{student.name}</div>
+                              <div className="text-xs text-slate-400">{student.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-sm font-medium text-slate-600">{student.course}</td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-center">
+                            <select 
+                              value={isPresent ? 'present' : 'absent'}
+                              onChange={(e) => setAttendance(prev => ({ ...prev, [student.id]: e.target.value === 'present' }))}
+                              className={`px-3 py-1.5 rounded-lg text-sm font-bold border outline-none cursor-pointer transition-colors ${
+                                isPresent 
+                                  ? 'bg-green-50 text-green-700 border-green-200 focus:ring-2 focus:ring-green-500/20' 
+                                  : 'bg-rose-50 text-rose-700 border-rose-200 focus:ring-2 focus:ring-rose-500/20'
+                              }`}
+                            >
+                              <option value="present">Present</option>
+                              <option value="absent">Absent</option>
+                            </select>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors"><MoreVertical className="w-5 h-5" /></button>
+                        </td>
+                      </motion.tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+
         </div>
       </motion.div>
     );
