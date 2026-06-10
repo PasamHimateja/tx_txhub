@@ -1,8 +1,10 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Routes, Route, Navigate } from "react-router-dom";
+import { AuthContext } from "../context/AuthContext";
 
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
+import AboutTxhub from "../components/AboutTxhub";
 import Categories from "../components/Categories";
 import Modes from "../components/Modes";
 import WhyChoose from "../components/WhyChoose";
@@ -98,6 +100,7 @@ function Home() {
 
       <div className="pt-20">
         <Hero />
+        <AboutTxhub />
         <Categories />
         <Courses />
         <Modes />
@@ -110,6 +113,8 @@ function Home() {
 }
 
 const AppRoutes = () => {
+  const { isLoggedIn } = useContext(AuthContext);
+
   return (
     <WebsiteLayout>
       <AuthModal />
@@ -125,7 +130,12 @@ const AppRoutes = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/internship" element={<Form />} />
         <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/my-courses" element={<MyCourses />} />
+        <Route
+          path="/my-courses"
+          element={
+            isLoggedIn ? <Navigate to="/student" replace /> : <Navigate to="/login" replace />
+          }
+        />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/events" element={<Events />} />

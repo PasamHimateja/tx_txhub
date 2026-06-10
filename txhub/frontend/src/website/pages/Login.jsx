@@ -16,7 +16,7 @@ const Login = () => {
       if (isAdmin) {
         window.location.href = "/admin";
       } else {
-        navigate("/my-courses");
+        navigate("/");
       }
     }
   }, [user, navigate]);
@@ -102,7 +102,7 @@ const Login = () => {
           window.location.href = "/admin";
         } else {
           login(actualUser);
-          navigate("/my-courses");
+          navigate("/");
         }
       } else {
         toast.error(data.error || "Login failed. Please check your credentials.");
@@ -147,7 +147,7 @@ const Login = () => {
           window.location.href = "/admin";
         } else {
           login(actualUser);
-          navigate("/my-courses");
+          navigate("/");
         }
       } else {
         toast.error(data.error || "Google Login failed");

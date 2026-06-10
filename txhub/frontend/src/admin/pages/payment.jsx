@@ -153,7 +153,7 @@ const PaymentPage = () => {
                 <div className="bg-white rounded-[2rem] shadow-xl shadow-slate-200/60 overflow-hidden flex flex-col lg:flex-row border border-slate-200/60">
 
                     {/* LEFT SIDE: MIDNIGHT BLUE INVOICE */}
-                    <div className="bg-[#0B0F19] relative p-10 lg:p-12 lg:w-[42%] flex flex-col overflow-hidden text-white">
+                    <div className="bg-[#0B0F19] relative p-8 lg:p-8 lg:w-[42%] flex flex-col overflow-hidden text-white">
                         {/* Subtle Premium Glow */}
                         <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-indigo-500/10 rounded-full blur-[80px] -mr-20 -mt-20 pointer-events-none"></div>
 
@@ -213,7 +213,7 @@ const PaymentPage = () => {
                     </div>
 
                     {/* RIGHT SIDE: CRISP WHITE PAYMENT UI */}
-                    <div className="p-8 lg:p-12 lg:w-[58%] bg-white flex flex-col justify-center">
+                    <div className="p-8 lg:p-8 lg:w-[58%] bg-white flex flex-col justify-center">
                         <form onSubmit={handlePayment} className="space-y-8">
 
                             {/* 1. PAYMENT PLAN */}

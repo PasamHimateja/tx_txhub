@@ -227,7 +227,7 @@ const Settings = () => {
         </div>
 
         {/* RIGHT CONTENT */}
-        <div className="flex-1 p-8 lg:p-12 bg-white">
+        <div className="flex-1 p-8 lg:p-8 bg-white">
           {activeTab === 'profile' ? (
             <div className="max-w-3xl space-y-10">
 

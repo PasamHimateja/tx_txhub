@@ -14,7 +14,7 @@ const Partners = () => {
   ];
 
   return (
-    <section id="partners" className="bg-slate-50 py-16 md:py-24">
+    <section id="partners" className="bg-slate-50 py-16 md:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12">
         {/* Title */}
         <div className="text-center mb-16">
@@ -25,7 +25,7 @@ const Partners = () => {
         </div>
 
         <div className="overflow-hidden mt-10">
-          <div className="flex gap-16 animate-scroll items-center">
+          <div className="flex gap-8 animate-scroll items-center">
             {logos.concat(logos).map((logo, index) => (
               <img
                 key={index}

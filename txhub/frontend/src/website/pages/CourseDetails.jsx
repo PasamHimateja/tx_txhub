@@ -1044,7 +1044,7 @@ const CourseDetails = () => {
               <div className="w-full space-y-4">
                 {enrolled ? (
                   <button
-                    onClick={() => navigate("/my-courses")}
+                    onClick={() => navigate("/student")}
                     className="w-full py-5 bg-green-600 text-white rounded-2xl font-black text-xl transition-all shadow-2xl shadow-green-500/20 hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-3"
                   >
                     Start Course <ArrowRight size={22} />

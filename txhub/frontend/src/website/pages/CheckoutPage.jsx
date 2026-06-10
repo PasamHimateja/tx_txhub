@@ -156,11 +156,11 @@ const discount = originalPriceBase - actualPrice;
           clearCart();
 
           // ✅ redirect
-          navigate("/my-courses");
+          navigate("/student");
         }
 
         // 🔥 Redirect to My Courses to see the new enrollment
-        navigate("/my-courses");
+        navigate("/student");
       } else {
         console.error("❌ Payment Failed:", data);
         alert(data.error || "Payment failed ❌");

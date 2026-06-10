@@ -298,7 +298,7 @@ onMouseEnter={() => {
             ) : (
               <div className="flex items-center gap-3 relative">
                 <button
-                  onClick={() => navigate("/my-courses")}
+                  onClick={() => navigate("/student")}
                   className="hidden md:block px-5 py-2.5 text-sm font-bold text-blue-600 bg-blue-50 rounded-xl hover:bg-blue-100 transition-all"
                 >
                   My Courses
@@ -344,13 +344,13 @@ onMouseEnter={() => {
 
                       {/* Actions */}
                       <div className="grid gap-1">
-                        {/* <button
-                          onClick={() => { navigate("/my-courses"); setIsProfileMenuOpen(false); }}
+                        <button
+                          onClick={() => { navigate("/student"); setIsProfileMenuOpen(false); }}
                           className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-slate-600 font-bold hover:bg-blue-50 hover:text-blue-600 transition-all text-sm"
                         >
                           <LayoutGrid size={18} />
                           My Courses
-                        </button> */}
+                        </button>
                         <button
                           onClick={() => { logout(); setIsProfileMenuOpen(false); }}
                           className="flex items-center gap-3 w-full px-4 py-3 rounded-2xl text-red-500 font-black hover:bg-red-50 transition-all text-sm mt-1"
@@ -480,7 +480,7 @@ onMouseEnter={() => {
 
                 <div className="grid grid-cols-1 gap-3">
                   <button
-                    onClick={() => { navigate("/my-courses"); setIsMenuOpen(false); }}
+                    onClick={() => { navigate("/student"); setIsMenuOpen(false); }}
                     className="flex items-center justify-center gap-3 px-6 py-4 bg-white border-2 border-slate-100 text-slate-700 rounded-2xl font-black text-base shadow-sm active:scale-95 transition-all"
                   >
                     <LayoutGrid size={20} />

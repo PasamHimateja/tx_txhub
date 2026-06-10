@@ -161,7 +161,7 @@ const ClassManagement = () => {
     const batchOptions = ['All Batches', 'June Batch', 'Sept Batch', 'Dec Batch'];
 
     return (
-        <div className="min-h-screen bg-[#F3F4F6] p-4 lg:p-12 font-sans text-slate-900">
+        <div className="min-h-screen bg-[#F3F4F6] p-4 lg:p-8 font-sans text-slate-900">
             <div className="max-w-7xl mx-auto space-y-8">
 
                 {/* HEADER */}
@@ -358,7 +358,7 @@ const ClassManagement = () => {
 
                         <div className="p-6 lg:p-8 overflow-y-auto space-y-4 flex-1 bg-[#F9FAFB]">
                             {feed.length === 0 ? (
-                                <div className="text-center text-slate-400 italic py-20 font-medium text-sm">
+                                <div className="text-center text-slate-400 italic py-12 font-medium text-sm">
                                     No content posted yet. Start broadcasting!
                                 </div>
                             ) : (

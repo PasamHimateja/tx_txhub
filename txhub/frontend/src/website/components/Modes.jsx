@@ -148,7 +148,7 @@ const Modes = () => {
   ];
 
   return (
-    <section id="modes" className="bg-slate-50 py-16 md:py-24">
+    <section id="modes" className="bg-slate-50 py-16 md:py-16">
       <div className="max-w-7xl mx-auto px-4 sm:px-8 lg:px-12 text-center">
         <h2 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight mb-4">
           Modes We Train
@@ -164,7 +164,7 @@ const Modes = () => {
               initial="rest"
               whileHover="hover"
               animate="rest"
-              className="relative overflow-hidden bg-white cursor-pointer rounded-[2.5rem] shadow-xl border border-slate-100 p-12 h-[420px] flex flex-col items-center justify-center"
+              className="relative overflow-hidden bg-white cursor-pointer rounded-[2.5rem] shadow-xl border border-slate-100 p-8 h-[420px] flex flex-col items-center justify-center"
             >
               {/* Expanding Circle Background */}
               <motion.div

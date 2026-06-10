@@ -181,7 +181,7 @@ const RegistrationPortal = () => {
   };
 
   return (
-    <div className="min-h-screen bg-[#F3F4F6] p-4 lg:p-12 font-sans text-slate-900">
+    <div className="min-h-screen bg-[#F3F4F6] p-4 lg:p-8 font-sans text-slate-900">
       <div className="max-w-7xl mx-auto space-y-8">
         
         {/* HEADER */}

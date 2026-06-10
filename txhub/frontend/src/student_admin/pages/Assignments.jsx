@@ -14,18 +14,10 @@ const Assignments = () => {
         <div className="p-6 border-b border-slate-100 flex items-center justify-between">
           <h2 className="font-bold text-lg text-slate-800">Pending Tasks</h2>
         </div>
-        <div className="divide-y divide-slate-100">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="p-6 flex items-center justify-between hover:bg-slate-50 transition-colors">
-              <div>
-                <h3 className="font-bold text-slate-800">Assignment {i}</h3>
-                <p className="text-sm text-slate-500 mt-1">Due in {i} days</p>
-              </div>
-              <button className="px-4 py-2 bg-indigo-50 text-indigo-600 font-semibold rounded-lg hover:bg-indigo-100 transition-colors text-sm">
-                Submit Now
-              </button>
-            </div>
-          ))}
+        <div className="p-10 text-center text-slate-500 border-t border-slate-100">
+          <ClipboardList size={48} className="text-slate-200 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-slate-700 mb-1">No Pending Tasks</h3>
+          <p>You have no pending assignments at the moment.</p>
         </div>
       </div>
     </div>
