@@ -155,7 +155,7 @@ const AuthModal = () => {
             window.location.href = "/admin"; // admin panel
           } else {
             closeAuthModal(); // normal user
-            navigate("/my-courses");
+            navigate("/");
           }
         } else {
           alert("Registration Successful! Please login.");
@@ -202,7 +202,7 @@ const AuthModal = () => {
           window.location.href = "/admin";
         } else {
           closeAuthModal();
-          navigate("/my-courses");
+          navigate("/");
         }
 
         alert("Google Login Successful");

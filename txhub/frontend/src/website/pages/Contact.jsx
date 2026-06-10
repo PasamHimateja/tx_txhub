@@ -85,22 +85,69 @@ const ContactPage = () => {
     message: "",
   });
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [openFaq, setOpenFaq] = useState(null);
 
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (form.name && form.email && form.message) {
+const handleSubmit = async (e) => {
+
+  e.preventDefault();
+
+  if (form.name && form.email && form.message) {
+
+    try {
+      setLoading(true);
+
+      const response = await fetch(
+        "https://script.google.com/macros/s/AKfycby6HqdNMqaWq1DCIgNjZR6IUW2xpwIFZaZOTc5kRKs2iEitm58tXa1tUCYimAJEGXs/exec",
+        {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(form),
+        }
+      );
+
       setSubmitted(true);
+
+      setForm({
+        name: "",
+        email: "",
+        phone: "",
+        course: "",
+        message: "",
+      });
+      setLoading(false);
+
+    } catch (error) {
+
+      console.log(error);
+
+      alert("Something went wrong");
+
     }
-  };
+  }
+};
 
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero */}
-      <div className="relative bg-gradient-to-br from-blue-600 via-indigo-600 to-purple-700 pt-36 pb-32 px-6 overflow-hidden">
+      <div className="relative pt-36 pb-32 px-6 overflow-hidden bg-slate-900">
+        {/* Background Image & Overlay */}
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
+            alt="Contact Us Background" 
+            className="w-full h-full object-cover opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-indigo-900/90 to-purple-900/90 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent opacity-10" />
+        </div>
+
         <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-blue-400/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
@@ -143,7 +190,7 @@ const ContactPage = () => {
         transition={{ duration: 0.6, delay: 0.2 }}
         className="max-w-4xl mx-auto px-6 -mt-20 relative z-10 mb-16"
       >
-        <div className="bg-white rounded-[2.5rem] p-8 md:p-12 border border-slate-100 shadow-2xl shadow-indigo-900/10">
+        <div className="bg-white rounded-[2.5rem] p-8 border border-slate-100 shadow-2xl shadow-indigo-900/10">
           <p className="text-[10px] font-black text-blue-600 uppercase tracking-[0.25em] mb-2 text-center">
             Send a Message
           </p>
@@ -198,7 +245,7 @@ const ContactPage = () => {
                       value={form.name}
                       onChange={handleChange}
                       required
-                      placeholder="John Doe"
+                      placeholder=".........."
                       className="w-full bg-slate-50 border border-slate-200 rounded-xl pl-11 pr-4 py-3.5 text-sm font-medium text-slate-700 outline-none focus:border-blue-500 focus:ring-4 focus:ring-blue-50 focus:bg-white transition-all placeholder:text-slate-400 shadow-sm"
                     />
                   </div>
@@ -292,12 +339,15 @@ const ContactPage = () => {
               </div>
 
               <button
-                type="submit"
-                className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-black text-sm shadow-xl shadow-blue-200 hover:shadow-blue-300 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 active:scale-95 mt-4"
-              >
-                <Send size={18} />
-                Send Message
-              </button>
+  type="submit"
+  disabled={loading}
+  className="w-full py-4 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-xl font-black text-sm shadow-xl shadow-blue-200 hover:shadow-blue-300 hover:-translate-y-1 transition-all flex items-center justify-center gap-2 active:scale-95 mt-4 disabled:opacity-70 disabled:cursor-not-allowed"
+>
+  <Send size={18} />
+
+  {loading ? "Sending..." : "Send Message"}
+
+</button>
             </form>
           )}
         </div>

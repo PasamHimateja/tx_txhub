@@ -10,19 +10,11 @@ const SampleCertificates = () => {
           Sample Certificates
         </h1>
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {[1, 2].map((i) => (
-          <div key={i} className="bg-white rounded-2xl p-8 shadow-sm border border-slate-100 flex flex-col items-center justify-center text-center">
-            <div className="w-20 h-20 rounded-full bg-amber-50 flex items-center justify-center mb-4">
-              <Award size={40} className="text-amber-500" />
-            </div>
-            <h3 className="font-bold text-xl text-slate-800">Certificate of Completion {i}</h3>
-            <p className="text-slate-500 mt-2">Awarded for successfully finishing the course.</p>
-            <button className="mt-6 px-6 py-2 bg-indigo-600 text-white rounded-lg font-semibold hover:bg-indigo-700 transition-colors">
-              View Certificate
-            </button>
-          </div>
-        ))}
+      {/* Empty State */}
+      <div className="bg-white rounded-2xl p-12 text-center shadow-sm border border-slate-100">
+        <Award size={48} className="mx-auto text-slate-300 mb-4" />
+        <h3 className="text-lg font-bold text-slate-700">No Certificates Yet</h3>
+        <p className="text-slate-500 mt-2">Complete courses to earn certificates. Your achievements will appear here.</p>
       </div>
     </div>
   );

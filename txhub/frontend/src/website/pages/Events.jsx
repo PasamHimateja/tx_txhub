@@ -78,9 +78,21 @@ const EventsPage = () => {
   return (
     <div className="min-h-screen bg-slate-50">
       {/* Hero Section */}
-      <div className="relative bg-gradient-to-br from-indigo-700 via-purple-700 to-fuchsia-700 pt-36 pb-24 px-6 overflow-hidden">
-        <div className="absolute top-0 right-0 w-96 h-96 bg-white/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
-        <div className="absolute bottom-0 left-0 w-80 h-80 bg-fuchsia-400/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
+      <div className="relative pt-36 pb-24 px-6 overflow-hidden bg-slate-900">
+        {/* Background Image & Overlay */}
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1540575467063-178a50c2df87?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
+            alt="Tech Event Hackathon" 
+            className="w-full h-full object-cover opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-blue-900/90 via-indigo-900/90 to-purple-900/90 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent opacity-10" />
+        </div>
+
+        {/* Decorative Blurs */}
+        <div className="absolute top-0 right-0 w-96 h-96 bg-blue-400/20 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
+        <div className="absolute bottom-0 left-0 w-80 h-80 bg-purple-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
 
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <div className="flex items-center justify-center gap-2 text-indigo-200 text-sm mb-6 font-medium">
@@ -187,7 +199,7 @@ const EventsPage = () => {
         </div>
 
         {filteredEvents.length === 0 && (
-          <div className="text-center py-20">
+          <div className="text-center py-12">
             <div className="w-20 h-20 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-4">
               <Ticket className="text-slate-400" size={32} />
             </div>

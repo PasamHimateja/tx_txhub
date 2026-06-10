@@ -79,32 +79,13 @@ const CircularProgress = ({ progress, size = 36, strokeWidth = 3 }) => {
 };
 
 // ─── INITIAL MOCK DATA ─────────────────────────────────────
-const INITIAL_STUDENTS = [
-  { id: 1, name: 'Alice Freeman', email: 'alice.f@example.com', course: 'Advanced React', progress: 85, status: 'Active' },
-  { id: 2, name: 'Marcus Johnson', email: 'mjohnson@example.com', course: 'UI/UX Design', progress: 42, status: 'At Risk' },
-  { id: 3, name: 'Sophia Chen', email: 'schen@example.com', course: 'Data Science 101', progress: 95, status: 'Active' },
-  { id: 4, name: 'Liam Rodriguez', email: 'liam.r@example.com', course: 'Advanced React', progress: 12, status: 'Inactive' },
-  { id: 5, name: 'Emma Wilson', email: 'emma.w@example.com', course: 'Python Basics', progress: 68, status: 'Active' },
-];
+const INITIAL_STUDENTS = [];
 
-const INITIAL_COURSES = [
-  { id: 1, title: 'Advanced React Patterns', students: 142, rating: 4.8, progress: 60, image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?q=80&w=300&h=200&fit=crop' },
-  { id: 2, title: 'UI/UX Masterclass', students: 89, rating: 4.9, progress: 35, image: 'https://images.unsplash.com/photo-1561070791-2526d30994b5?q=80&w=300&h=200&fit=crop' },
-  { id: 3, title: 'Python Data Science', students: 210, rating: 4.7, progress: 85, image: 'https://images.unsplash.com/photo-1526379095098-d400fd0bfce8?q=80&w=300&h=200&fit=crop' },
-];
+const INITIAL_COURSES = [];
 
-const INITIAL_NOTES = [
-  { id: 1, title: 'React Hooks Cheat Sheet', date: 'Oct 12, 2023', course: 'Advanced React', type: 'PDF', size: '2.4 MB' },
-  { id: 2, title: 'Week 3 Assignment Guidelines', date: 'Oct 10, 2023', course: 'UI/UX Design', type: 'DOC', size: '1.1 MB' },
-  { id: 3, title: 'Machine Learning Models Overview', date: 'Oct 08, 2023', course: 'Python Data Science', type: 'PPT', size: '5.6 MB' },
-];
+const INITIAL_NOTES = [];
 
-const INITIAL_ASSIGNMENTS = [
-  { id: 1, title: 'Build a Todo App with React Hooks', course: 'Advanced React', dueDate: '2024-11-15', status: 'Active', submissions: 98, total: 142 },
-  { id: 2, title: 'Design a Mobile Banking App', course: 'UI/UX Design', dueDate: '2024-11-18', status: 'Active', submissions: 45, total: 89 },
-  { id: 3, title: 'Linear Regression Analysis Project', course: 'Python Data Science', dueDate: '2024-11-10', status: 'Closed', submissions: 200, total: 210 },
-  { id: 4, title: 'State Management with Redux', course: 'Advanced React', dueDate: '2024-11-25', status: 'Draft', submissions: 0, total: 142 },
-];
+const INITIAL_ASSIGNMENTS = [];
 
 const TABS = [
   { id: 'overview', label: 'Overview', icon: TrendingUp },
@@ -162,7 +143,6 @@ export default function MentorDashboard() {
         if (assignmentsRes.data?.length > 0) setAssignments(assignmentsRes.data);
         if (overviewRes.data) {
           setOverviewData(overviewRes.data);
-          // Build dynamic courses from course_breakdown
           if (overviewRes.data.course_breakdown) {
             const dynamicCourses = Object.entries(overviewRes.data.course_breakdown)
               .filter(([, count]) => count > 0)
@@ -173,7 +153,16 @@ export default function MentorDashboard() {
                 progress: Math.min(100, count * 10),
                 image: COURSE_IMAGES[title] || COURSE_IMAGES['default'],
               }));
-            if (dynamicCourses.length > 0) setCourses(dynamicCourses);
+            
+            if (dynamicCourses.length > 0) {
+              setCourses(dynamicCourses);
+            } else if (trainerData?.assigned_course) {
+              // If no students yet, still show the assigned course so they can upload notes
+              setCourses([{
+                id: 1, title: trainerData.assigned_course, students: 0, rating: 5.0, progress: 0,
+                image: COURSE_IMAGES[trainerData.assigned_course] || COURSE_IMAGES['default']
+              }]);
+            }
           }
         }
       } catch (error) {
@@ -423,131 +412,194 @@ export default function MentorDashboard() {
   // ═══════════════════════════════════════════
   const NotesTab = () => {
     const fileInputRef = useRef(null);
-    const [uploadedFiles, setUploadedFiles] = useState([]);
-    const [selectedCourse, setSelectedCourse] = useState(courses[0]?.title || '');
+    const [stagedFiles, setStagedFiles] = useState([]);
+    const [selectedCourse, setSelectedCourse] = useState(trainerData?.assigned_course || '');
     const [selectedBatch, setSelectedBatch] = useState('');
     const [dragOver, setDragOver] = useState(false);
+    const [sending, setSending] = useState(false);
 
-    const handleFiles = (files) => {
+    const typeStyle = (ext) => {
+      if (ext === 'PDF') return { bg: 'bg-red-50', text: 'text-red-600', border: 'border-red-100' };
+      if (['DOC','DOCX'].includes(ext)) return { bg: 'bg-blue-50', text: 'text-blue-600', border: 'border-blue-100' };
+      if (['PPT','PPTX'].includes(ext)) return { bg: 'bg-orange-50', text: 'text-orange-600', border: 'border-orange-100' };
+      if (['XLS','XLSX'].includes(ext)) return { bg: 'bg-green-50', text: 'text-green-600', border: 'border-green-100' };
+      if (['ZIP','RAR'].includes(ext)) return { bg: 'bg-purple-50', text: 'text-purple-600', border: 'border-purple-100' };
+      return { bg: 'bg-slate-50', text: 'text-slate-600', border: 'border-slate-100' };
+    };
+
+    const stageFiles = (files) => {
       const newFiles = Array.from(files).map(f => ({
-        name: f.name, size: (f.size / (1024 * 1024)).toFixed(2) + ' MB', type: f.name.split('.').pop().toUpperCase()
+        name: f.name,
+        size: f.size < 1024 * 1024 ? (f.size / 1024).toFixed(1) + ' KB' : (f.size / (1024 * 1024)).toFixed(2) + ' MB',
+        ext: f.name.split('.').pop().toUpperCase(),
+        id: Date.now() + Math.random(),
       }));
-      setUploadedFiles(prev => [...prev, ...newFiles]);
-      showToast(`${newFiles.length} file(s) selected for upload`);
+      setStagedFiles(prev => [...prev, ...newFiles]);
     };
 
     const handleSend = async () => {
-      if (uploadedFiles.length === 0) { showToast('Please select files first', 'error'); return; }
-      
+      if (stagedFiles.length === 0) { showToast('Please select at least one file first', 'error'); return; }
+      if (!selectedCourse) { showToast('Please select a course first', 'error'); return; }
+      setSending(true);
       let successCount = 0;
-      for (const f of uploadedFiles) {
+      for (const f of stagedFiles) {
         try {
-          const res = await fetch(`${API_BASE_URL}/notes/`, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: f.name, course: selectedCourse, batch_month: selectedBatch, content: `Type: ${f.type}, Size: ${f.size}` })
+          const res = await api.post('/notes/', {
+            title: f.name,
+            course: selectedCourse,
+            batch_month: selectedBatch,
+            content: `Type: ${f.ext}, Size: ${f.size}`,
+            trainer: trainerData?.id || null,
           });
-          if (res.ok) {
-            const newNote = await res.json();
-            setNotes(prev => [newNote, ...prev]);
+          if (res.status === 200 || res.status === 201) {
+            setNotes(prev => [res.data, ...prev]);
             successCount++;
           }
         } catch (err) {
-          console.error(err);
+          showToast(`Failed: ${f.name}`, 'error');
+          console.error(err.response?.data || err.message);
         }
       }
-      
-      setUploadedFiles([]);
-      showToast(`${successCount} file(s) sent to "${selectedCourse}" students!`);
+      setSending(false);
+      if (successCount > 0) {
+        setStagedFiles([]);
+        showToast(`${successCount} file(s) sent to "${selectedCourse}" students!`);
+      }
     };
 
     return (
       <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+        {/* LEFT – Shared Materials (already sent) */}
         <div className="lg:col-span-2 bg-white rounded-3xl p-6 shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100">
           <h3 className="font-bold text-lg text-slate-800 mb-6">Shared Materials <span className="text-sm font-normal text-slate-400">({notes.length})</span></h3>
-          <div className="space-y-4 max-h-[500px] overflow-y-auto pr-2">
-            {notes.map(note => (
-              <div key={note.id} className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 hover:border-indigo-100 hover:shadow-md transition-all group">
-                <div className="flex items-center gap-4">
-                  <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm ${
-                    note.type === 'PDF' ? 'bg-red-50 text-red-500' : note.type === 'DOC' || note.type === 'DOCX' ? 'bg-blue-50 text-blue-500' : 'bg-amber-50 text-amber-500'
-                  }`}>{note.type}</div>
-                  <div>
-                    <h4 className="font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors">{note.title}</h4>
-                    <p className="text-xs text-slate-400 mt-0.5">{note.course} • {note.date} • {note.size}</p>
-                  </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  <button onClick={() => showToast(`Downloaded "${note.title}"`)} className="p-2 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-xl transition-colors" title="Download"><Download className="w-5 h-5" /></button>
-                  <button onClick={() => { setNotes(prev => prev.filter(n => n.id !== note.id)); showToast(`Deleted "${note.title}"`); }}
-                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-xl transition-colors" title="Delete"><Trash2 className="w-4 h-4" /></button>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100 h-max">
-          <h3 className="font-bold text-lg text-slate-800 mb-4">Send New Material</h3>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Course</label>
-                <select value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
-                  {courses.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
-                </select>
-              </div>
-              <div>
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Batch (Optional)</label>
-                <select value={selectedBatch} onChange={(e) => setSelectedBatch(e.target.value)}
-                  className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
-                  <option value="">All Batches</option>
-                  <option value="15 May 2026">15 May 2026</option>
-                  <option value="01 June 2026">01 June 2026</option>
-                  <option value="15 June 2026">15 June 2026</option>
-                  <option value="01 July 2026">01 July 2026</option>
-                </select>
-              </div>
+          {notes.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+              <FileText className="w-12 h-12 mb-3 text-slate-200" />
+              <p className="text-sm font-semibold">No materials shared yet.</p>
+              <p className="text-xs mt-1">Upload files on the right and click Send to Students.</p>
             </div>
-            <div>
-              <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-2 block">Upload File</label>
-              <input type="file" ref={fileInputRef} multiple className="hidden" onChange={(e) => handleFiles(e.target.files)} />
-              <div
-                onClick={() => fileInputRef.current?.click()}
-                onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
-                onDragLeave={() => setDragOver(false)}
-                onDrop={(e) => { e.preventDefault(); setDragOver(false); handleFiles(e.dataTransfer.files); }}
-                className={`border-2 border-dashed rounded-2xl p-8 text-center cursor-pointer transition-colors ${
-                  dragOver ? 'border-indigo-400 bg-indigo-50' : 'border-slate-300 hover:bg-indigo-50/50 hover:border-indigo-300'
-                }`}
-              >
-                <Upload className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-                <p className="text-sm font-semibold text-slate-600">Click to upload or drag and drop</p>
-                <p className="text-xs text-slate-400 mt-1">PDF, DOC, PPT up to 10MB</p>
-              </div>
-            </div>
-            {uploadedFiles.length > 0 && (
-              <div className="space-y-2">
-                <label className="text-xs font-bold text-slate-500 uppercase tracking-wider">Selected Files</label>
-                {uploadedFiles.map((f, i) => (
-                  <div key={i} className="flex items-center justify-between p-2 bg-white rounded-xl border border-slate-200">
-                    <div className="flex items-center gap-2">
-                      <Paperclip className="w-4 h-4 text-slate-400" />
-                      <span className="text-sm text-slate-700 truncate max-w-[150px]">{f.name}</span>
+          ) : (
+            <div className="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+              {notes.map(note => {
+                const ext = (note.title || '').split('.').pop().toUpperCase();
+                const s = typeStyle(ext);
+                return (
+                  <div key={note.id} className="flex items-center justify-between p-4 rounded-2xl border border-slate-100 hover:border-indigo-100 hover:shadow-md transition-all group">
+                    <div className="flex items-center gap-4">
+                      <div className={`w-12 h-12 rounded-xl flex items-center justify-center font-bold text-sm border ${s.bg} ${s.text} ${s.border}`}>{ext || 'FILE'}</div>
+                      <div>
+                        <h4 className="font-semibold text-slate-800 group-hover:text-indigo-600 transition-colors text-sm">{note.title}</h4>
+                        <p className="text-xs text-slate-400 mt-0.5">
+                          {note.course}{note.batch_month ? ` · ${note.batch_month}` : ' · All Batches'} · {new Date(note.created_at).toLocaleDateString('en-IN', { day:'numeric', month:'short', year:'numeric' })}
+                        </p>
+                      </div>
                     </div>
-                    <button onClick={() => setUploadedFiles(prev => prev.filter((_, idx) => idx !== i))} className="p-1 text-slate-400 hover:text-rose-500"><X className="w-3 h-3" /></button>
+                    <button onClick={async () => {
+                      try { await api.delete(`/notes/${note.id}/`); setNotes(prev => prev.filter(n => n.id !== note.id)); showToast(`Deleted "${note.title}"`); }
+                      catch { showToast('Delete failed', 'error'); }
+                    }} className="p-2 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-xl transition-colors opacity-0 group-hover:opacity-100" title="Delete">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
                   </div>
-                ))}
-              </div>
-            )}
-            <button onClick={handleSend} className="w-full py-3 bg-indigo-600 text-white rounded-xl font-bold shadow-lg shadow-indigo-200 hover:bg-indigo-700 transition-colors flex items-center justify-center gap-2 active:scale-95">
-              <Send className="w-4 h-4" /> Send to Students
-            </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+
+        {/* RIGHT – Upload panel */}
+        <div className="bg-slate-50 rounded-3xl p-6 border border-slate-100 h-max space-y-4">
+          <h3 className="font-bold text-lg text-slate-800">Upload New Material</h3>
+
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Course *</label>
+            <select value={selectedCourse} onChange={(e) => setSelectedCourse(e.target.value)}
+              className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
+              <option value="">-- Select Course --</option>
+              {courses.map(c => <option key={c.id} value={c.title}>{c.title}</option>)}
+            </select>
           </div>
+
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Batch (Optional)</label>
+            <select value={selectedBatch} onChange={(e) => setSelectedBatch(e.target.value)}
+              className="w-full p-3 bg-white border border-slate-200 rounded-xl text-sm focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500 outline-none">
+              <option value="">All Batches</option>
+              <option value="15 May 2026">15 May 2026</option>
+              <option value="01 June 2026">01 June 2026</option>
+              <option value="15 June 2026">15 June 2026</option>
+              <option value="01 July 2026">01 July 2026</option>
+            </select>
+          </div>
+
+          {/* Step 1 – Pick files */}
+          <div>
+            <label className="text-xs font-bold text-slate-500 uppercase tracking-wider mb-1 block">Step 1 — Select Files</label>
+            <input type="file" ref={fileInputRef} multiple className="hidden" onChange={(e) => { stageFiles(e.target.files); e.target.value = ''; }} />
+            <div
+              onClick={() => fileInputRef.current?.click()}
+              onDragOver={(e) => { e.preventDefault(); setDragOver(true); }}
+              onDragLeave={() => setDragOver(false)}
+              onDrop={(e) => { e.preventDefault(); setDragOver(false); stageFiles(e.dataTransfer.files); }}
+              className={`border-2 border-dashed rounded-2xl p-6 text-center cursor-pointer transition-all ${
+                dragOver ? 'border-indigo-400 bg-indigo-50 scale-[1.01]' : 'border-slate-300 hover:bg-indigo-50/50 hover:border-indigo-300'
+              }`}
+            >
+              <Upload className="w-7 h-7 text-slate-400 mx-auto mb-2" />
+              <p className="text-sm font-semibold text-slate-600">Click or drag & drop files here</p>
+              <p className="text-xs text-slate-400 mt-1">PDF, DOC, PPT, XLS up to 10MB</p>
+            </div>
+          </div>
+
+          {/* Step 2 – Preview staged files */}
+          {stagedFiles.length > 0 && (
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <label className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+                  Step 2 — Confirm & Send ({stagedFiles.length} file{stagedFiles.length !== 1 ? 's' : ''})
+                </label>
+                <button onClick={() => setStagedFiles([])} className="text-xs text-rose-400 hover:text-rose-600 hover:underline">Clear all</button>
+              </div>
+              {stagedFiles.map((f) => {
+                const s = typeStyle(f.ext);
+                return (
+                  <div key={f.id} className={`flex items-center justify-between p-3 bg-white rounded-xl border ${s.border} shadow-sm`}>
+                    <div className="flex items-center gap-3 min-w-0">
+                      <div className={`w-9 h-9 rounded-lg flex items-center justify-center text-[11px] font-black flex-shrink-0 ${s.bg} ${s.text}`}>
+                        {f.ext.slice(0, 4)}
+                      </div>
+                      <div className="min-w-0">
+                        <p className="text-sm font-semibold text-slate-700 truncate max-w-[150px]">{f.name}</p>
+                        <p className="text-xs text-slate-400">{f.size}</p>
+                      </div>
+                    </div>
+                    <button onClick={() => setStagedFiles(prev => prev.filter(x => x.id !== f.id))}
+                      className="p-1.5 text-slate-300 hover:text-rose-500 hover:bg-rose-50 rounded-lg transition-colors flex-shrink-0">
+                      <X className="w-3.5 h-3.5" />
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Send button */}
+          <button onClick={handleSend} disabled={sending || stagedFiles.length === 0}
+            className={`w-full py-3 rounded-xl font-bold shadow-lg transition-all flex items-center justify-center gap-2 active:scale-95 ${
+              stagedFiles.length === 0 ? 'bg-slate-200 text-slate-400 cursor-not-allowed shadow-none'
+                : 'bg-indigo-600 text-white shadow-indigo-200 hover:bg-indigo-700'
+            }`}>
+            {sending
+              ? <><div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" /> Sending...</>
+              : <><Send className="w-4 h-4" /> Send to Students{stagedFiles.length > 0 ? ` (${stagedFiles.length})` : ''}</>}
+          </button>
         </div>
       </motion.div>
     );
   };
+
+
 
   // ═══════════════════════════════════════════
   //  ATTENDANCE TAB
@@ -611,12 +663,8 @@ export default function MentorDashboard() {
                   course: students.find(s => s.id == id)?.course || 'Unknown'
                 }));
                 try {
-                  const res = await fetch(`${API_BASE_URL}/attendance/`, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify(records)
-                  });
-                  if (res.ok) {
+                  const res = await api.post('/attendance/', records);
+                  if (res.status === 200 || res.status === 201) {
                     showToast('Attendance records saved!');
                   } else {
                     showToast('Failed to save attendance', 'error');
@@ -852,7 +900,7 @@ export default function MentorDashboard() {
   // ═══════════════════════════════════════════
   const NewAssignmentForm = () => {
     const [title, setTitle] = useState('');
-    const [course, setCourse] = useState(courses[0]?.title || '');
+    const [course, setCourse] = useState(trainerData?.assigned_course || '');
     const [batch, setBatch] = useState('');
     const [dueDate, setDueDate] = useState('');
 
@@ -861,21 +909,25 @@ export default function MentorDashboard() {
       if (!title.trim() || !dueDate) { showToast('Please fill all fields', 'error'); return; }
       
       try {
-        const res = await fetch(`${API_BASE_URL}/assignments/`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: title.trim(), course, batch_month: batch, dueDate })
+        const res = await api.post('/assignments/', {
+          title: title.trim(),
+          course,
+          batch_month: batch,
+          dueDate,
+          trainer: trainerData?.id || null,
         });
-        if (res.ok) {
-          const newAssign = await res.json();
+        if (res.status === 200 || res.status === 201) {
+          const newAssign = res.data;
           setAssignments(prev => [newAssign, ...prev]);
           showToast(`Assignment "${title}" created!`);
           setShowNewAssignment(false);
         } else {
           showToast('Failed to save to database.', 'error');
+          console.error('Assignment error:', res.data);
         }
       } catch (err) {
-        showToast('Network error while saving.', 'error');
+        console.error('Assignment save error:', err.response?.data || err.message);
+        showToast(`Error: ${JSON.stringify(err.response?.data || err.message)}`, 'error');
       }
     };
 
@@ -930,7 +982,9 @@ export default function MentorDashboard() {
             <GraduationCap className="w-8 h-8 text-indigo-600" />
             Mentor Workspace
           </h1>
-          <p className="text-slate-500 mt-1 font-medium">Manage your classes, students, and materials efficiently.</p>
+          <p className="text-slate-500 mt-1 font-medium">
+            Welcome, <span className="font-bold text-indigo-600">{trainerData?.name || 'Trainer'}</span> · {trainerData?.assigned_course || ''}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           <button onClick={() => showToast('You have 3 new notifications', 'info')} className="p-2.5 bg-white border border-slate-200 rounded-xl text-slate-600 hover:bg-slate-50 shadow-sm relative">
@@ -939,6 +993,17 @@ export default function MentorDashboard() {
           </button>
           <button onClick={() => setShowResourceModal(true)} className="flex items-center gap-2 px-4 py-2.5 bg-indigo-600 text-white rounded-xl text-sm font-bold hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-200 active:scale-95">
             <Plus className="w-4 h-4" /> Create Resource
+          </button>
+          <button
+            onClick={() => {
+              localStorage.removeItem('trainer_access_token');
+              localStorage.removeItem('trainer_refresh_token');
+              localStorage.removeItem('trainer_data');
+              navigate('/login');
+            }}
+            className="flex items-center gap-2 px-4 py-2.5 bg-white border border-rose-200 text-rose-600 rounded-xl text-sm font-bold hover:bg-rose-50 transition-all shadow-sm active:scale-95"
+          >
+            <LogOut className="w-4 h-4" /> Logout
           </button>
         </div>
       </div>

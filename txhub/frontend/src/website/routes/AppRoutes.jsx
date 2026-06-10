@@ -3,6 +3,7 @@ import { Routes, Route, Navigate } from "react-router-dom";
 
 import Navbar from "../components/Navbar";
 import Hero from "../components/Hero";
+import AboutTXHub from "../components/AboutTXHub";
 import Categories from "../components/Categories";
 import Modes from "../components/Modes";
 import WhyChoose from "../components/WhyChoose";
@@ -10,7 +11,6 @@ import Partners from "../components/Partners";
 import FAQ from "../components/FAQ";
 import Footer from "../components/Footer";
 import Courses from "../components/Courses";
-import MyCourses from "../pages/MyCourses";
 import CheckoutPage from "../pages/CheckoutPage";
 import Login from "../pages/Login";
 import Register from "../pages/Register";
@@ -98,6 +98,7 @@ function Home() {
 
       <div className="pt-20">
         <Hero />
+        <AboutTXHub />
         <Categories />
         <Courses />
         <Modes />
@@ -125,7 +126,7 @@ const AppRoutes = () => {
         <Route path="/forgot-password" element={<ForgotPassword />} />
         <Route path="/internship" element={<Form />} />
         <Route path="/checkout" element={<CheckoutPage />} />
-        <Route path="/my-courses" element={<MyCourses />} />
+        <Route path="/my-courses" element={<Navigate to="/student" replace />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/contact" element={<Contact />} />
         <Route path="/events" element={<Events />} />

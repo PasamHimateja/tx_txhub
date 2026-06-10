@@ -139,26 +139,28 @@ def login_user(request):
     return Response({"error": "User not found"}, status=404)
 
 from App.models import Trainer
+from django.views.decorators.csrf import csrf_exempt
 
+@csrf_exempt
 @api_view(['POST'])
 def trainer_login(request):
     email = request.data.get('email', '').strip().lower()
     password = request.data.get('password', '').strip()
-
+ 
     if not email or not password:
         return Response({"error": "Email and password are required"}, status=400)
-
+ 
     trainer = Trainer.objects.filter(email__iexact=email).first()
-
+ 
     if not trainer:
         return Response({"error": "Invalid email or password"}, status=401)
-
+ 
     if not trainer.check_password(password):
         return Response({"error": "Invalid email or password"}, status=401)
-
+ 
     if not trainer.is_active:
         return Response({"error": "Account is deactivated. Please contact admin."}, status=403)
-
+ 
     try:
         # Build JWT manually (Trainer is not a Django auth user)
         refresh = RefreshToken()
@@ -167,7 +169,7 @@ def trainer_login(request):
         refresh['name'] = trainer.name
         refresh['role'] = 'trainer'
         refresh['assigned_course'] = trainer.assigned_course
-
+ 
         return Response({
             "message": "Trainer Login successful",
             "type": "trainer",
@@ -180,24 +182,25 @@ def trainer_login(request):
                 "assigned_course": trainer.assigned_course,
             }
         }, status=200)
-
+ 
     except Exception as e:
         import traceback
         traceback.print_exc()
         print("JWT generation error:", e)
         return Response({"error": "Login failed due to a server error. Please try again."}, status=500)
-
+ 
 @api_view(['GET'])
 def trainer_profile(request):
     trainer_id = request.query_params.get('trainer_id')
     if not trainer_id:
         return Response({"error": "trainer_id required"}, status=400)
-        
+       
     try:
         trainer = Trainer.objects.get(id=trainer_id)
         return Response(TrainerSerializer(trainer).data)
     except Trainer.DoesNotExist:
         return Response({"error": "Trainer not found"}, status=404)
+ 
 
 
 
@@ -360,16 +363,17 @@ def get_students(request):
     
     students = Student.objects.all().order_by('-id')
     
-    if trainer_id:
-        try:
-            trainer = Trainer.objects.get(id=trainer_id)
-            if trainer.assigned_course and trainer.assigned_course != 'All Courses':
-                students = students.filter(courseSpecialization__icontains=trainer.assigned_course)
-        except Trainer.DoesNotExist:
-            pass
+    # Temporarily comment out the strict filtering so the mentor can see all students
+    # if trainer_id:
+    #     try:
+    #         trainer = Trainer.objects.get(id=trainer_id)
+    #         if trainer.assigned_course and trainer.assigned_course != 'All Courses':
+    #             students = students.filter(courseSpecialization__icontains=trainer.assigned_course)
+    #     except Trainer.DoesNotExist:
+    #         pass
             
-    if course and course != 'All Courses':
-        students = students.filter(courseSpecialization__icontains=course)
+    # if course and course != 'All Courses':
+    #     students = students.filter(courseSpecialization__icontains=course)
         
     serializer = StudentSerializer(students, many=True)
     
@@ -818,10 +822,10 @@ def mentor_overview(request):
     if trainer_id:
         try:
             trainer = Trainer.objects.get(id=trainer_id)
-            if trainer.assigned_course and trainer.assigned_course != 'All Courses':
-                students = students.filter(courseSpecialization__icontains=trainer.assigned_course)
-                assignments = assignments.filter(course__icontains=trainer.assigned_course)
-                notes = notes.filter(course__icontains=trainer.assigned_course)
+            # if trainer.assigned_course and trainer.assigned_course != 'All Courses':
+            #     students = students.filter(courseSpecialization__icontains=trainer.assigned_course)
+            #     assignments = assignments.filter(course__icontains=trainer.assigned_course)
+            #     notes = notes.filter(course__icontains=trainer.assigned_course)
         except Trainer.DoesNotExist:
             pass
 

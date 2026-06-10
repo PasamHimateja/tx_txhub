@@ -151,7 +151,18 @@ const BlogPage = () => {
   return (
     <div className="min-h-screen bg-slate-50 font-sans">
       {/* Hero Banner */}
-      <div className="relative bg-gradient-to-br from-slate-900 via-indigo-950 to-blue-900 pt-36 pb-28 px-6 overflow-hidden">
+      <div className="relative pt-36 pb-28 px-6 overflow-hidden bg-slate-900">
+        {/* Background Image & Overlay */}
+        <div className="absolute inset-0">
+          <img 
+            src="https://images.unsplash.com/photo-1499750310107-5fef28a66643?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80" 
+            alt="Blog Background" 
+            className="w-full h-full object-cover opacity-50"
+          />
+          <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-indigo-900/90 to-blue-900/90 mix-blend-multiply" />
+          <div className="absolute inset-0 bg-gradient-to-t from-slate-50 via-transparent to-transparent opacity-10" />
+        </div>
+
         {/* Background blobs */}
         <div className="absolute top-0 right-0 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2" />
         <div className="absolute bottom-0 left-0 w-80 h-80 bg-indigo-500/20 rounded-full blur-3xl translate-y-1/2 -translate-x-1/2" />
@@ -371,7 +382,7 @@ const BlogPage = () => {
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "-100px" }}
           transition={{ duration: 0.6 }}
-          className="mt-24 bg-slate-900 rounded-[2.5rem] p-12 text-center relative overflow-hidden shadow-2xl shadow-slate-900/30"
+          className="mt-12 bg-slate-900 rounded-[2.5rem] p-8 text-center relative overflow-hidden shadow-2xl shadow-slate-900/30"
         >
           <div className="absolute inset-0 bg-gradient-to-tr from-blue-900/20 to-indigo-900/20" />
           <div className="absolute top-0 left-0 w-64 h-64 bg-blue-500/10 rounded-full blur-3xl -translate-y-1/2 -translate-x-1/2" />
